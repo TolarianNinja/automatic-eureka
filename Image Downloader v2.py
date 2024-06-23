@@ -32,6 +32,7 @@ def get_set_cards(set_code):
         if search.has_more():
             page_count = page_count + 1;
         if not search.has_more():
+            print("")
             return card_list
 
 # Used for console output of get_set_cards function.
@@ -59,7 +60,7 @@ def card_style(card):
                 card_style = "P"
             elif "promopack" in card["promo_types"] or "bundle" in card["promo_types"]:
                 card_style = "Promo"
-        elif "extendedart" in card["frame_effects"]:
+        if "extendedart" in card["frame_effects"]:
             card_style = "Ext Art"
         if len(card_style) > 0:
             card_style = " [" + card_style + "]"
@@ -81,48 +82,46 @@ def fix_characters(card):
     current_file = unidecode(current_file)
     return current_file
 
-# 
-def build_filename(card):
-    c_name = fix_characters(card)
-    dup_count = 0 #basic_check(card)
-    c_style = card_style(card)
-    return c_name + c_style
-"""
-    if dup_count > 0:
-        return c_name + " [" + str(dup_count) + "]"
-    if len(c_style) != 0:
-        return c_name + " [" + c_style + "]"
-    return c_name
-"""
-
-def find_duplicates(card_list):
+# Takes in the set / array of cards and returns an array of strings with fixed file names.
+# Nested for loops are to find duplicate cards that would have the same file name.  This typically
+# happens when there are multiple arts with the same frame (like basic lands).  Each card needs to
+# see if there are any other copies in the list, and because that is accounting for different Booster Fun
+# treatments its two birds one stone.
+def build_file_names(card_list):
+    card_names = []
     for top_card in card_list:
-        top_name = unidecode(top_card["name"] + card_style(top_card))
+        top_name = unidecode(fix_characters(top_card) + card_style(top_card))
         card_count = 1
+        dup_found = False
         for bottom_card in card_list:
             bottom_name = unidecode(bottom_card["name"] + card_style(bottom_card))
-            if top_name == bottom_name and top_card["collector_number"] > bottom_card["collector_number"]:
-                card_count = card_count + 1
-                print("Top Name: " + top_name + " Top Num: " + str(top_card["collector_number"]) +
-                      " Bottom Name: " + bottom_name + " Bottom Num: " + str(bottom_card["collector_number"]) + "Count: " + str(card_count))
+            if top_name == bottom_name and top_card["collector_number"] != bottom_card["collector_number"]:
+                dup_found = True
+                if top_card["collector_number"] > bottom_card["collector_number"]:
+                    card_count = card_count + 1
+        if dup_found:
+            top_name = top_name + " [" + str(card_count) + "]"
+        card_names.append(top_name)
+    for name in card_names:
+        print(name)
+    bad_files = validate_file_names(card_list, card_names)
+    return card_names
 
-"""
-#
-def basic_check(card):
-    dup_count = 0
-    for name, count in duplicate_counts:
-        if name in card["name"]:
-            duplicate_counts.update(name,count = count + 1)
-            return count
-    return dup_count
-
-#
-def build_dupes():
-    for name in basics:
-        duplicate_counts.append((name,0))
-    print(duplicate_counts)
-"""
-
+# Checks that the file names line up with the cards in order
+def validate_file_names(card_list, card_names):
+    bad_file_names = []
+    current_name = ""
+    i = 0
+    while i < len(card_list):
+        current_name = fix_characters(card_list[i]) + card_style(card_list[i])
+        if current_name not in card_names[i]:
+            bad_file_names.append(card_names[i])
+        i = i + 1
+    if len(bad_file_names) > 0:
+        print("There has been an error!")
+    return bad_file_names
+        
+        
 def get_card_console(card):
     card_name = build_filename(card)
     print("Card Name: " + card_name)
@@ -132,8 +131,15 @@ def get_set_console(set_code):
     print("Set Name: " + card_set.name() + "\nSet Code: " + card_set.code() + "\nRelease Date: " + str(card_set.released_at()) +
           "\nNumber of Cards: " + str(card_set.card_count()) + "\n")
     card_list = get_set_cards(set_code)
+    not_basic = 0
     for card in card_list:
-        get_card_console(card)
-
-#get_set_console("pwoe")
-find_duplicates(get_set_cards("woe"))
+        dupes = find_dupes(card,card_list)
+        if len(dupes) > 0:
+            if "Basic" not in card["type_line"]:
+                not_basic = not_basic + 1
+                print(str(build_filename(card)) + str(find_dupes(card,card_list)))
+    if not_basic > 0:
+        print("\nThere were " + str(not_basic) + " duplicate card names that were not basic lands.")
+    
+#get_set_console("woe")
+build_file_names(get_set_cards("woe"))
