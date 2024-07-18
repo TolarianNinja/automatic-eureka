@@ -1,0 +1,63 @@
+import dloader, sets
+
+# set_list              The list of sets
+# current_set           The current set (JSON) that is loaded
+# current_set_name      The name of the loaded set
+# current_set_code      The code of the loaded set
+# current_set_size      The total number of cards in the set
+# card_list             A list containing each individual card (JSON) in the set
+# set_languages_nf      The languages of all nonfoil cards in the set
+# set_languages_f       The languages of all foil only cards in the set
+# file_names            The array of formatted filenames
+class Controller:
+    def __init__(self):
+        self.set_list = sets.get_sets_full()
+        self.current_set = None
+        self.current_set_name = ""
+        self.current_set_code = ""
+        self.current_set_size = 0
+        self.card_list = []
+        self.set_languages_nf = []
+        self.set_languages_f = []
+        self.file_names = []
+
+    def __str__(self):
+        return str(self.current_set["name"])
+    
+    def update_set(set_code):
+        self.current_set = sets.get_set(set_code)
+        self.current_set_code = set_code
+        self.current_set_size = int(current_set["card_count"])
+        self.card_list = sets.get_set_cards(set_code)
+        self.set_languages_nf = sets.get_set_languages(card_list,False)
+        self.set_languages_f = sets.get_set_languages(card_list,True)
+        self.file_names = sets.build_file_names(card_list)
+
+    def get_current_set():
+        return current_set
+
+    def print_set_list(self):
+        for c_set in self.set_list:
+            print(str(c_set))
+
+    def set_code_str(set_code):
+        code_len = len(set_code)
+        for i in [code_len, 8]:
+            set_code = set_code + " "
+        return set_code
+
+    def get_sets_str(self):
+        set_strings = []
+        for c_set in self.set_list:
+            set_code = str(c_set[1]["code"]).upper()
+            code_len = len(set_code)
+            i = code_len
+            while i < 6:
+                set_code = set_code + " "
+                i = i + 1
+            entry = set_code + " - " + str(c_set[1]["name"])
+            set_strings.append(entry)
+        return set_strings
+
+    def execute():
+        return
