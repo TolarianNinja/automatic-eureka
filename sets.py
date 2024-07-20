@@ -42,9 +42,12 @@ def get_set(set_code):
 # Grabs all the sets from Scrython, splits it into an enumerated list, and
 # returns that list.
 def get_sets_full():
+    set_list = []
     sets = scrython.sets.Sets()
     sets = enumerate(sets.data())
-    return sets
+    for c_set in sets:
+        set_list.append(c_set[1])
+    return set_list
     
 
 # Used for console output of get_set_cards function.
