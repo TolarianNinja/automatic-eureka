@@ -28,7 +28,7 @@ Scrython library by NandaScott
                         message=about_message)
 
 def button_click_start():
-    return
+    eris.execute()
 
 def set_selected(self):
     set_code_text.set(get_code_selected())
@@ -48,6 +48,7 @@ def set_box_select_all():
 
 def set_box_select_filter():
     sets_box['values'] = sets_list_filtered
+
 
 # Controller Actions
 sets_list = eris.get_sets_str()                     # Get formatted list of sets for Combobox
@@ -96,18 +97,18 @@ radio_filtered = Radiobutton(frame_top, text = "Filtered", value = "filtered")
 
 # Start Button
 start_image = PhotoImage(file = r"images/start.png")
-get_set_button = Button(frame_top, image = start_image, width=29, height=36, pady=2)
+get_set_button = Button(frame_top, command=button_click_start, image = start_image, width=29, height=36, pady=2)
 
 # Events
 sets_box.bind("<<ComboboxSelected>>", set_selected)
-radio_all.bind("<<RadiobuttonSelected>>", set_box_select_all)
-radio_filtered.bind("<<RadiobuttonSelected>>", set_box_select_filter)
+#radio_all.bind("<<RadiobuttonSelected>>", set_box_select_all)
+#radio_filtered.bind("<<RadiobuttonSelected>>", set_box_select_filter)
 
 # Top Frame Grid Sets
 sets_box.grid(row=0, column=0, columnspan=4)
 set_info_label.grid(sticky = "W", row=1, column=0, columnspan=2)
-radio_all.grid(row=1, column=2)
-radio_filtered.grid(row=1, column=3)
+#radio_all.grid(row=1, column=2)
+#radio_filtered.grid(row=1, column=3)
 get_set_button.grid(row=0, column=4, rowspan=2)
 
 # Bottom Frame

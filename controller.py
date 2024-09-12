@@ -17,7 +17,7 @@ class Controller:
         self.current_set_name = self.current_set["name"]
         self.current_set_code = self.current_set["code"]
         self.current_set_size = self.current_set["card_count"]
-        self.card_list = sets.get_set_cards(self.current_set_code)
+        self.card_list = sets.get_set_cards(self.current_set_code,True)
         self.set_languages_nf = []
         self.set_languages_f = []
         self.file_names = []
@@ -36,7 +36,7 @@ class Controller:
         self.current_set_code = set_code
         self.current_set_name = self.current_set["name"]
         self.current_set_size = self.current_set["card_count"]
-        self.card_list = sets.get_set_cards(set_code)
+        self.card_list = sets.get_set_cards(set_code,False)
         #self.set_languages_nf = sets.get_set_languages(self.card_list,False)
         #self.set_languages_f = sets.get_set_languages(self.card_list,True)
         #self.file_names = sets.build_file_names(self.card_list)
@@ -96,5 +96,5 @@ class Controller:
             set_strings.append(entry)
         return set_strings
 
-    def execute():
-        return
+    def execute(self):
+        dloader.download_set_images(self.current_set)

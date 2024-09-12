@@ -89,9 +89,9 @@ def fix_set_name(name):
     return set_name
 
 def build_folders(card_set):
-    set_name = fix_set_name(card_set.name())
+    set_name = fix_set_name(card_set["name"])
     main_path = image_path + set_name + "\\"
-    card_list = sets.get_set_cards(card_set.code(),True)
+    card_list = sets.get_set_cards(card_set["code"],True)
     langs = get_set_languages(card_list,False)
     langs_foil = get_set_languages(card_list,True)
     os.makedirs(main_path,511,True)
@@ -236,7 +236,7 @@ def get_lang_path(path,card):
 
 def download_set_images(card_set):
     path = build_folders(card_set)
-    card_list = sets.get_set_cards(card_set.code(),False)
+    card_list = sets.get_set_cards(card_set["code"],False)
     for card in card_list:
         time.sleep(0.23)            # Rate limit
         download_path = get_lang_path(path,card)
