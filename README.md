@@ -5,6 +5,9 @@ It is a GUI version of the Bag of Tricks file Scrython Image Downloader.py
 
 Changelog:
 
+v0.2.2
+GUI allows for selecting a filtered list of sets without playable paper cards.
+
 v0.2.1
 GUI will update with information about the set selected from set drop down
 
