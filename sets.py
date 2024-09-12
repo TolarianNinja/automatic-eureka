@@ -48,7 +48,32 @@ def get_sets_full():
     for c_set in sets:
         set_list.append(c_set[1])
     return set_list
-    
+
+# Filters the full list of sets to remove anything that is not a printed (paper)
+# set of legal cards (ie: no tokens, oversized, inserts, etc)
+def get_sets_cards_only():
+    set_list_filtered = []
+    set_list_full = get_sets_full()
+    set_types = []
+    for c_set in set_list_full:
+        match c_set["set_type"]:
+            case "memorabilia":
+                continue
+            case "minigame":
+                continue
+            case "token":
+                continue
+            case "planechase":
+                continue
+            case "vanguard":
+                continue
+            case "archenemy":
+                continue
+            case _:
+                if not c_set["digital"]:
+                    print(c_set["name"])
+                    set_list_filtered.append(c_set)
+    return set_list_filtered
 
 # Used for console output of get_set_cards function.
 def cards_remaining(set_size, page_count):
@@ -60,7 +85,7 @@ def cards_remaining(set_size, page_count):
 # Check if the card is a style other than the standard printing
 def card_style(card):
     card_style = ""
-    if "sld" in card["set_code"]:
+    if "sld" in card["set"]:
         card_style = col_num_prefix(card)
     else:
         try:
@@ -69,9 +94,35 @@ def card_style(card):
             if "showcase" in card["frame_effects"]:
                 card_style = "Showcase"
             if "borderless" in card["border_color"] and "showcase" not in card["frame_effects"]:
-                card_style = "Borderless"
+                card_style = "Alt Art"
             if "1997" in card["frame"] and "boosterfun" in card["promo_types"]:
                 card_style = "Retro"
+            if "stepandcompleat" in card["promo_types"]:
+                card_style = "Compleat"
+            if "confettifoil" in card["promo_types"]:
+                card_style = "Confetti"
+            if "dossier" in card["promo_types"]:
+                card_style = "Dossier"
+            if "embossed" in card["promo_types"]:
+                card_style = "Embossed"
+            if "etched" in card["frame_effects"]:
+                card_style = "Etched"
+            if "galaxyfoil" in card["promo_types"]:
+                card_style = "Galaxy Foil"
+            if "gilded" in card["promo_types"]:
+                card_style = "Gilded"
+            if "halofoil" in card["promo_types"]:
+                card_style = "Halo"
+            if "invisibleink" in card["promo_types"]:
+                card_style = "Invisible Ink"
+            if "magnified" in card["promo_types"]:
+                card_style = "Magnified"
+            if "oilslick" in card["promo_types"]:
+                card_style = "Oil"
+            if "rainbowfoil" in card["promo_types"]:
+                card_style = "Rainbow"
+            if "textured" in card["promo_types"]:
+                card_style = "Textured"
             if card["promo"]:
                 if "prerelease" in card["promo_types"]:
                     card_style = "S"
@@ -141,6 +192,7 @@ def build_file_names(card_list):
             continue
         card_name = fix_characters(card) + card_style(card)
         card_dupes = find_dupes(card,card_list)
+        #print("Card Name: " + card_name + " Dupes: " + str(card_dupes))
         if card_dupes > 0:
             card_name = card_name + " [" + str(card_dupes) + "]"
         card_names.append(card_name)
@@ -158,7 +210,7 @@ def find_dupes(card,card_list):
     card_name = fix_characters(card) + card_style(card)
     for loop_card in card_list:
         if 'z' in loop_card["collector_number"]:
-            return 0
+            continue
         loop_name = fix_characters(loop_card) + card_style(loop_card)
         if card_name == loop_name and card["collector_number"] != loop_card["collector_number"]:
             dup_found = True
@@ -260,19 +312,43 @@ def get_set_console(set_code):
           "\nSet Type: " + card_set.set_type() + "\nNumber of Cards: " + str(card_set.card_count()) + "\n")
     card_list = get_set_cards(set_code)
     not_basic = 0
-"""
-    for card in card_list:
-        dupes = find_dupes(card,card_list)
-        if len(dupes) > 0:
-            if "Basic" not in card["type_line"]:
-                not_basic = not_basic + 1
-                print(str(build_filename(card)) + str(find_dupes(card,card_list)))
-    if not_basic > 0:
-        print("\nThere were " + str(not_basic) + " duplicate card names that were not basic lands.")
-"""
+
+def get_properties_all_cards():
+    sets = get_sets_full()
+    promo_types = []
+    frame_effects = []
+    border_color = []
+    for c_set in sets:
+        if c_set["card_count"] < 1:
+            continue
+        card_list = get_set_cards(c_set["code"])
+        print("Set: " + c_set["code"])
+        for card in card_list:
+            try:
+                for p_type in card["promo_types"]:
+                    if p_type not in promo_types:
+                        promo_types.append(p_type)
+            except KeyError:
+                pass
+            try:
+                for f_effect in card["frame_effects"]:
+                    if f_effect not in frame_effects:
+                        frame_effects.append(f_effect)
+            except KeyError:
+                pass
+            try:
+                for b_color in card["border_color"]:
+                    if b_color not in border_color:
+                        border_color.append(b_color)
+            except KeyError:
+                pass
+    print("Promo Types: " + str(promo_types) + " Frame Effects: " + str(frame_effects)
+          + " Border Colors: " + str(border_color))
+
+        
 
 #get_set_console("h2r")
-#build_file_names(get_set_cards("dmr"))
+#build_file_names(get_set_cards("ltr"))
 #get_set("snc")
 #print(get_languages(get_set_cards("snc"),True))
 #download_images(get_set("snc"))
@@ -280,3 +356,5 @@ def get_set_console(set_code):
 #sets = get_sets_full()
 #for c_set in sets:
 #    print(c_set)
+#get_properties_all_cards()
+#get_sets_cards_only()
