@@ -16,7 +16,7 @@ image_path = "E:\\Programming Projects\\Python\\Automatic-Eureka\\Testing Dump\\
 
 
 # Get the list of cards in the set from Scryfall
-def get_set_cards(set_code):
+def get_set_cards(set_code,quiet):
     card_list = []
     query = '++e:' + set_code
     page_count = 1;
@@ -24,7 +24,8 @@ def get_set_cards(set_code):
     set_size = 1
     while(True):
         search = scrython.cards.Search(q=query, page=page_count, order="set")
-        print("Processing cards " + str(card_count) + " to " + str(cards_remaining(search.total_cards(), page_count)) + "...")
+        if not quiet:
+            print("Processing cards " + str(card_count) + " to " + str(cards_remaining(search.total_cards(), page_count)) + "...")
         time.sleep(0.5)
         for card in search.data():
             card_list.append(card)
