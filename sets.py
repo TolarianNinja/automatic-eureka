@@ -58,17 +58,9 @@ def get_sets_filtered(set_list_full):
     set_types = []
     for c_set in set_list_full:
         match c_set["set_type"]:
-            case "memorabilia":
+            case "memorabilia" | "minigame" | "token":
                 continue
-            case "minigame":
-                continue
-            case "token":
-                continue
-            case "planechase":
-                continue
-            case "vanguard":
-                continue
-            case "archenemy":
+            case "vanguard" | "planechase" | "archenemy":
                 continue
             case _:
                 if not c_set["digital"]:

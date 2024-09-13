@@ -5,58 +5,105 @@ image_path = "E:\\Programming Projects\\Python\\Automatic-Eureka\\Testing Dump\\
 
 def card_style(card):
     card_style = ""
+    variant_foil = False
     if "sld" in card["set"]:
         card_style = col_num_prefix(card)
+    if "type_line" in card:
+        if "Basic" in card["type_line"]:
+            return card_style
+    if card["promo"]:
+        if len(card_style := is_set_promo(card)) > 0:
+            return " [" + card_style + "]"
+    elif "promo_types" in card:
+        if len(card_style := is_variant_foil(card)) > 0:
+            variant_foil = True
+        elif len(card_style := is_set_foil(card)) > 0:
+            return " [" + card_style + "]"
+    if "frame_effects" in card:
+        if len(card_style := is_variant(card,variant_foil,card_style)) > 0:
+            return " [" + card_style + "]"
+    if len(card_style := is_borderless(card,variant_foil,card_style)) > 0:
+        return " [" + card_style + "]"
+    if len(card_style) > 0:
+        return " [" + card_style + "]"
     else:
-        try:
-            if "surgefoil" in card["promo_types"]:
-                card_style = "Surge"
-            if "showcase" in card["frame_effects"]:
-                card_style = "Showcase"
-            if "borderless" in card["border_color"] and "showcase" not in card["frame_effects"]:
-                card_style = "Alt Art"
-            if "1997" in card["frame"] and "boosterfun" in card["promo_types"]:
-                card_style = "Retro"
-            if "stepandcompleat" in card["promo_types"]:
-                card_style = "Compleat"
-            if "confettifoil" in card["promo_types"]:
-                card_style = "Confetti"
-            if "dossier" in card["promo_types"]:
-                card_style = "Dossier"
-            if "embossed" in card["promo_types"]:
-                card_style = "Embossed"
-            if "etched" in card["frame_effects"]:
-                card_style = "Etched"
-            if "galaxyfoil" in card["promo_types"]:
-                card_style = "Galaxy Foil"
-            if "gilded" in card["promo_types"]:
-                card_style = "Gilded"
-            if "halofoil" in card["promo_types"]:
-                card_style = "Halo"
-            if "invisibleink" in card["promo_types"]:
-                card_style = "Invisible Ink"
-            if "magnified" in card["promo_types"]:
-                card_style = "Magnified"
-            if "oilslick" in card["promo_types"]:
-                card_style = "Oil"
-            if "rainbowfoil" in card["promo_types"]:
-                card_style = "Rainbow"
-            if "textured" in card["promo_types"]:
-                card_style = "Textured"
-            if card["promo"]:
-                if "prerelease" in card["promo_types"]:
-                    card_style = "S"
-                elif "stamped" in card["promo_types"]:
-                    card_style = "P"
-                elif "promopack" in card["promo_types"] or "bundle" in card["promo_types"]:
-                    card_style = "Promo"
-            if "extendedart" in card["frame_effects"]:
-                card_style = "Ext Art"
-            if len(card_style) > 0:
-                card_style = " [" + card_style + "]"
-            return card_style
-        except KeyError:
-            return card_style
+        return card_style
+
+def is_borderless(card,variant_foil,card_style):
+    version = ""
+    if "borderless" in card["border_color"]:
+        version = "Alt Art"
+    if len(version) > 0:
+        if variant_foil:
+            return card_style + " " + version
+        else:
+            return version
+    return card_style
+               
+def is_variant(card,variant_foil,card_style):
+    version = ""
+    if "extendedart" in card["frame_effects"]:
+        version = "Ext Art"
+    elif "showcase" in card["frame_effects"]:
+        version = "Showcase"
+    elif "etched" in card["frame_effects"]:
+        version = "Etched"
+    if len(version) > 0:
+        if variant_foil:
+            return card_style + " " + version
+        else:
+            return version
+    else:
+        return card_style
+
+def is_variant_foil(card):
+    card_style = ""
+    if "surgefoil" in card["promo_types"]:
+        card_style = "Surge"
+    elif "galaxyfoil" in card["promo_types"]:
+        card_style = "Galaxy"
+    return card_style
+
+def is_set_promo(card):
+    card_style = ""
+    if "prerelease" in card["promo_types"]:
+        card_style = "S"
+    elif "stamped" in card["promo_types"]:
+        card_style = "P"
+    elif "promopack" in card["promo_types"] or "bundle" in card["promo_types"]:
+        card_style = "Promo"
+    return card_style
+            
+def is_set_foil(card):
+    if "stepandcompleat" in card["promo_types"]:
+        card_style = "Compleat"
+    elif "confettifoil" in card["promo_types"]:
+        card_style = "Confetti"
+    elif "dossier" in card["promo_types"]:
+        card_style = "Dossier"
+    elif "embossed" in card["promo_types"]:
+        card_style = "Embossed"
+    elif "galaxyfoil" in card["promo_types"]:
+        card_style = "Galaxy Foil"
+    elif "gilded" in card["promo_types"]:
+        card_style = "Gilded"
+    elif "halofoil" in card["promo_types"]:
+        card_style = "Halo"
+    elif "invisibleink" in card["promo_types"]:
+        card_style = "Invisible Ink"
+    elif "magnified" in card["promo_types"]:
+        card_style = "Magnified"
+    elif "oilslick" in card["promo_types"]:
+        card_style = "Oil"
+    elif "rainbowfoil" in card["promo_types"]:
+        card_style = "Rainbow"
+    elif "textured" in card["promo_types"]:
+        card_style = "Textured"
+    elif "1997" in card["frame"] and "boosterfun" in card["promo_types"]:
+        card_style = "Retro"
+    else:
+        card_style = ""
+    return card_style
 
 def col_num_prefix(card):
     try:
@@ -107,7 +154,7 @@ def build_folders(card_set):
     return main_path
 
 # Finds if there are multiple cards with the same output name.
-# if no return 0, else return which instance this is (second Plains will be 2)
+# If no return 0, else return which instance this is (second Plains will be 2)
 def find_dupes(card,card_list):
     card_count = 1
     dup_found = False
@@ -120,7 +167,7 @@ def find_dupes(card,card_list):
             return 0
         loop_name = fix_characters(loop_card["name"]) + card_style(loop_card)
         loop_num = remove_non_num(loop_card["collector_number"])
-        if card_name == loop_name and card_num != loop_num:
+        if card_name == loop_name and card_num != loop_num and card["lang"] == loop_card["lang"]:# and card["finishes"] == loop_card["finishes"]:
             dup_found = True
             if card_num > loop_num:
                 card_count = card_count + 1
@@ -129,11 +176,12 @@ def find_dupes(card,card_list):
     else:
         return 0
 
-# Removes non-numeric characters from collector numbers.
+# Removes non-numeric characters from collector numbers.  Used to compare the numbers.
 def remove_non_num(number):
     output = ''.join(c for c in number if c.isdigit())
     return output
 
+# Checks the set 
 def get_set_languages(card_list,is_foil):
     languages = []
     for card in card_list:
@@ -176,9 +224,14 @@ def fix_lang(lang):
         case _:
             return "ENG"
 
+def collector_num_variant(card):
+    try:
+        coll_num = int(card["collector_number"])
+        return ""
+    except ValueError:
+        return card["collector_number"][-1]
+
 def download_image(card,dupes,path,size,get_digital):
-    # Do path stuff
-    #time.sleep(0.23)            # Rate limit 
     if card["digital"]:
         if not get_digital:
             return
@@ -190,6 +243,8 @@ def download_image(card,dupes,path,size,get_digital):
     os.chdir(path)
     if dupes > 0:
         dupe_string = " [" + str(dupes) + "]"
+    if len(coll_num := collector_num_variant(card)) > 0:
+        dupe_string = " [" + coll_num + "]"
     if card["layout"] == "transform" or card["layout"] == "modal_dfc":
         file_names = []
         for i in range(0, 2):
@@ -246,4 +301,16 @@ def download_set_images(card_set):
     print("Work complete.")
     
 
-#download_set_images(sets.get_set("lci"))
+#download_set_images(sets.get_set("pip"))
+"""
+set_cards = sets.get_set_cards("unf",False)
+for card in set_cards:
+    dupes = find_dupes(card,set_cards)
+    card_path = get_lang_path(image_path,card)
+    dupe_string = ""
+    if dupes > 0:
+        dupe_string = " [" + str(dupes) + "]"
+    elif len(coll_num := collector_num_variant(card)) > 0:
+        dupe_string = " [" + coll_num + "]"
+    print(str(card["collector_number"]) + ", " + card["name"] + card_style(card) + dupe_string)
+"""

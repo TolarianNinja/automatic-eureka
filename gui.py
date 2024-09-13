@@ -30,6 +30,9 @@ Scrython library by NandaScott
 def button_click_start():
     eris.execute()
 
+def button_click_new():
+    
+
 def set_selected(self):
     set_code_text.set(get_code_selected())
     code_str = set_code_text.get()

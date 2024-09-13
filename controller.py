@@ -31,7 +31,7 @@ class Controller:
     
     def update_set(self, set_code):
         for c_set in self.set_list:
-            if set_code in c_set["code"]:
+            if set_code == c_set["code"]:
                 self.current_set = c_set
         self.current_set_code = set_code
         self.current_set_name = self.current_set["name"]
