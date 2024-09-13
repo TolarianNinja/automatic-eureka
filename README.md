@@ -5,6 +5,9 @@ It is an updated (with GUI! and other things!) version of the Bag of Tricks file
 
 Changelog:
 
+v0.3.1
+Updated the function for handling card variants to be less of a mess.
+
 v0.3
 Clicking the start button will download the images for the selected set!  Updates to console.
 
