@@ -27,11 +27,31 @@ Scrython library by NandaScott
     messagebox.showinfo(title="About Scryfall Image Downloader",
                         message=about_message)
 
-def button_click_start():
-    eris.execute()
+def button_click_dep():
+    eris.build_folders()
 
-def button_click_new():
-    
+def button_click_start():
+    download_path = eris.build_folders()
+    for card in eris.get_card_list():
+        if card["digital"]:
+            continue
+        card_name = eris.download_image(card,download_path)
+        card_path = eris.get_lang_path(card,download_path) + card_name
+        update_image(image_label,card_path)
+        image_text_string.set("Downloaded " + card_name)
+        image_text_label.update()
+    complete_text = "Download of " + eris.get_set_name() + " completed successfully."
+    image_text_string.set(complete_text)
+        
+    """
+        build folders
+        for loop of cards in card list from eris
+            eris tells dloader: build file name, download card, return path of card
+            downloaded card name returned to for loop, stored in variable
+            update: side_image, ImageTk.PhotoImage, get full path (should store in controller)
+                    image_text_label, Label text with downloaded card name
+
+    """
 
 def set_selected(self):
     set_code_text.set(get_code_selected())
@@ -51,6 +71,12 @@ def set_box_select_all():
 
 def set_box_select_filter():
     sets_box['values'] = sets_list_filtered
+
+def update_image(image_label,path):
+    card_image = Image.open(path).resize((430,600))
+    tk_image = ImageTk.PhotoImage(card_image)
+    image_label.configure(image=tk_image)
+    image_label.image = tk_image
 
 
 # Controller Actions
@@ -92,7 +118,7 @@ set_search_font = font.Font(root,family="Courier New",size=8)
 root.option_add("*TCombobox*Listbox*Font", set_search_font)
 
 # Info Label for Selected Set
-set_info_label = Label(frame_top, width=39, textvariable=set_info_text, justify="left", anchor="w")
+set_info_label = Label(frame_top, width=50, textvariable=set_info_text, justify="left", anchor="w")
 
 # RadioButton for selecting filtered or not
 radio_all = Radiobutton(frame_top, text = "All Sets", value = "all")
@@ -123,7 +149,9 @@ side_image = ImageTk.PhotoImage(Image.open("images/splash.png").resize((430,600)
 image_label = Label(frame_bottom, image=side_image, height=615, width=441)
 
 # Info Label for Downloaded Image
-image_text_label = Label(frame_bottom, text="Image downloaded.")
+image_text_string = StringVar(frame_bottom)
+image_text_label = Label(frame_bottom, textvariable=image_text_string)
+image_text_string.set("You are reading me type.")
 
 # Bottom Frame Grid Sets
 image_label.grid(row=0, column=0)

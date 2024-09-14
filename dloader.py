@@ -66,12 +66,13 @@ def is_variant_foil(card):
 
 def is_set_promo(card):
     card_style = ""
-    if "prerelease" in card["promo_types"]:
-        card_style = "S"
-    elif "stamped" in card["promo_types"]:
-        card_style = "P"
-    elif "promopack" in card["promo_types"] or "bundle" in card["promo_types"]:
-        card_style = "Promo"
+    if "promo_types" in card:
+        if "prerelease" in card["promo_types"]:
+            card_style = "S"
+        elif "stamped" in card["promo_types"]:
+            card_style = "P"
+        elif "promopack" in card["promo_types"] or "bundle" in card["promo_types"]:
+            card_style = "Promo"
     return card_style
             
 def is_set_foil(card):
@@ -153,6 +154,18 @@ def build_folders(card_set):
         print("Created " + lang_path)
     return main_path
 
+def build_folders_new(path,set_name,langs_nf,langs_f):
+    main_path = path + fix_set_name(set_name) + "\\"
+    os.makedirs(main_path,511,True)
+    os.chdir(main_path)
+    for lang in langs_nf:
+        lang_path = main_path + lang + "\\"
+        os.makedirs(lang_path,511,True)
+    for lang in langs_f:
+        lang_path = main_path + lang + " FOIL\\"
+        os.makedirs(lang_path,511,True)
+    return main_path
+
 # Finds if there are multiple cards with the same output name.
 # If no return 0, else return which instance this is (second Plains will be 2)
 def find_dupes(card,card_list):
@@ -229,16 +242,15 @@ def collector_num_variant(card):
         coll_num = int(card["collector_number"])
         return ""
     except ValueError:
-        return card["collector_number"][-1]
+        if card["collector_number"][-1] in "psz":
+            return ""
+        else:
+            return card["collector_number"][-1]
 
 def download_image(card,dupes,path,size,get_digital):
     if card["digital"]:
         if not get_digital:
             return
-    if "png" in size:
-        ext = "png"
-    else:
-        ext = "jpg"
     dupe_string = ""
     os.chdir(path)
     if dupes > 0:
@@ -250,7 +262,7 @@ def download_image(card,dupes,path,size,get_digital):
         for i in range(0, 2):
             file_name = fix_characters(card["card_faces"][i]["name"]) + card_style(card) + dupe_string
             file_url = card["card_faces"][i]["image_uris"][size]
-            file_name = file_name + '.' + ext
+            file_name = file_name + '.' + get_ext(size)
             image_data = requests.get(file_url).content
             with open(file_name, 'wb') as handler:
                 handler.write(image_data)
@@ -260,12 +272,24 @@ def download_image(card,dupes,path,size,get_digital):
     else:
         file_name = fix_characters(card["name"]) + card_style(card) + dupe_string
         file_url = card["image_uris"][size]
-        file_name = file_name + '.' + ext
+        file_name = file_name + '.' + get_ext(size)
         image_data = requests.get(file_url).content
         with open(file_name, 'wb') as handler:
             handler.write(image_data)
             handler.close()
         return file_name
+
+def get_ext(size):
+    if "png" in size:
+        return "png"
+    else:
+        return "jpg"
+
+def boot_download(card,card_list,path,set_name,size,get_digital):
+    dupes = find_dupes(card,card_list)
+    download_path = get_lang_path(path,card)
+    file_name = download_image(card,dupes,download_path,size,get_digital)
+    return file_name
             
 def get_image_size(size):
     if "small" in size:

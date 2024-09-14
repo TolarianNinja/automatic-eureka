@@ -23,8 +23,9 @@ class Controller:
         self.file_names = []
         self.download_path = "E:\Programming Projects\Python\Automatic-Eureka\Testing Dump\\"
         self.use_png = False
-        self.include_digital = False
+        self.include_digital = True
         self.image_size = "large"
+        self.rate_limit = 0.23
 
     def __str__(self):
         return str(self.current_set["name"])
@@ -37,8 +38,8 @@ class Controller:
         self.current_set_name = self.current_set["name"]
         self.current_set_size = self.current_set["card_count"]
         self.card_list = sets.get_set_cards(set_code,False)
-        #self.set_languages_nf = sets.get_set_languages(self.card_list,False)
-        #self.set_languages_f = sets.get_set_languages(self.card_list,True)
+        self.set_languages_nf = sets.get_set_languages(self.card_list,False)
+        self.set_languages_f = sets.get_set_languages(self.card_list,True)
         #self.file_names = sets.build_file_names(self.card_list)
 
     def get_set_code(self):
@@ -56,7 +57,7 @@ class Controller:
     def find_set_code(set_code):
         current_set = None
         for c_set in self.set_list:
-            if set_code is c_set["code"]:
+            if set_code == c_set["code"]:
                 return c_set
         print("Could not find set " + set_code)
 
@@ -96,5 +97,32 @@ class Controller:
             set_strings.append(entry)
         return set_strings
 
-    def execute(self):
-        dloader.download_set_images(self.current_set)
+    def build_folders(self):
+        main_path = dloader.build_folders_new(
+            self.download_path,
+            self.current_set_name,
+            self.set_languages_nf,
+            self.set_languages_f)
+        return main_path
+
+    def get_download_path(self):
+        return self.download_path
+
+    def get_rate_limit(self):
+        return self.rate_limit
+
+    def get_card_list(self):
+        return self.card_list
+
+    def download_image(self,card,set_download_path):
+        file_name = dloader.boot_download(
+            card,
+            self.card_list,
+            set_download_path,
+            self.current_set_name,
+            self.image_size,
+            self.include_digital)
+        return file_name
+
+    def get_lang_path(self,card,path):
+        return dloader.get_lang_path(path,card)
