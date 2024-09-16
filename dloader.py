@@ -7,7 +7,7 @@ def card_style(card):
     card_style = ""
     variant_foil = False
     if "sld" in card["set"]:
-        card_style = col_num_prefix(card)
+        return " [" + str(col_num_prefix(card)) + "]"
     if "type_line" in card:
         if "Basic" in card["type_line"]:
             return card_style
@@ -80,6 +80,8 @@ def is_set_foil(card):
         card_style = "Compleat"
     elif "confettifoil" in card["promo_types"]:
         card_style = "Confetti"
+    elif "invisibleink" in card["promo_types"]:
+        card_style = "Invisible Ink"
     elif "dossier" in card["promo_types"]:
         card_style = "Dossier"
     elif "embossed" in card["promo_types"]:
@@ -90,8 +92,6 @@ def is_set_foil(card):
         card_style = "Gilded"
     elif "halofoil" in card["promo_types"]:
         card_style = "Halo"
-    elif "invisibleink" in card["promo_types"]:
-        card_style = "Invisible Ink"
     elif "magnified" in card["promo_types"]:
         card_style = "Magnified"
     elif "oilslick" in card["promo_types"]:
@@ -109,13 +109,15 @@ def is_set_foil(card):
 def col_num_prefix(card):
     try:
         col_num = int(card["collector_number"])
-        if col_num < 10:
-            output = "00" + str(col_num)
-        if col_num < 100:
-            output = "0" + str(col_num)
-        return output
     except ValueError:
         return card["collector_number"]
+    if col_num >= 100:
+        return col_num
+    elif col_num < 10:
+        output = "00" + str(col_num)
+    elif col_num < 100:
+        output = "0" + str(col_num)
+    return output
 
 def fix_characters(card_name):
     current_file = str(card_name)
@@ -136,25 +138,7 @@ def fix_set_name(name):
         set_name = str(name).replace(":", " -")
     return set_name
 
-def build_folders(card_set):
-    set_name = fix_set_name(card_set["name"])
-    main_path = image_path + set_name + "\\"
-    card_list = sets.get_set_cards(card_set["code"],True)
-    langs = get_set_languages(card_list,False)
-    langs_foil = get_set_languages(card_list,True)
-    os.makedirs(main_path,511,True)
-    os.chdir(main_path)
-    for lang in langs:
-        lang_path = main_path + lang + "\\"
-        os.makedirs(lang_path,511,True)
-        print("Created " + lang_path)
-    for lang in langs_foil:
-        lang_path = main_path + lang + " FOIL\\"
-        os.makedirs(lang_path,511,True)
-        print("Created " + lang_path)
-    return main_path
-
-def build_folders_new(path,set_name,langs_nf,langs_f):
+def build_folders(path,set_name,langs_nf,langs_f):
     main_path = path + fix_set_name(set_name) + "\\"
     os.makedirs(main_path,511,True)
     os.chdir(main_path)
@@ -171,6 +155,8 @@ def build_folders_new(path,set_name,langs_nf,langs_f):
 def find_dupes(card,card_list):
     card_count = 1
     dup_found = False
+    if card["set"] == "sld":
+        return 0
     if 'z' in card["collector_number"]:
         return 0
     card_name = fix_characters(card["name"]) + card_style(card)
@@ -192,7 +178,10 @@ def find_dupes(card,card_list):
 # Removes non-numeric characters from collector numbers.  Used to compare the numbers.
 def remove_non_num(number):
     output = ''.join(c for c in number if c.isdigit())
-    return output
+    if output == '':
+        return number
+    else:
+        return output
 
 # Checks the set 
 def get_set_languages(card_list,is_foil):
@@ -257,28 +246,37 @@ def download_image(card,dupes,path,size,get_digital):
         dupe_string = " [" + str(dupes) + "]"
     if len(coll_num := collector_num_variant(card)) > 0:
         dupe_string = " [" + coll_num + "]"
-    if card["layout"] == "transform" or card["layout"] == "modal_dfc":
+    if card["layout"] == "transform" or card["layout"] == "modal_dfc" or card["layout"] == "reversible_card":
         file_names = []
         for i in range(0, 2):
-            file_name = fix_characters(card["card_faces"][i]["name"]) + card_style(card) + dupe_string
+            if card["layout"] == "reversible card":
+                if i == 0:
+                    side = 'a'
+                else:
+                    side = 'b'
+                file_name = file_name = fix_characters(card["card_faces"][i]["name"]) + " [" + str(card["collector_number"]) + side + "]"
+            else:
+                file_name = fix_characters(card["card_faces"][i]["name"]) + card_style(card) + dupe_string
             file_url = card["card_faces"][i]["image_uris"][size]
             file_name = file_name + '.' + get_ext(size)
-            image_data = requests.get(file_url).content
-            with open(file_name, 'wb') as handler:
-                handler.write(image_data)
-                handler.close()
-            file_names.append(file_name)
+            if not os.path.exists(file_name):
+                image_data = requests.get(file_url).content
+                with open(file_name, 'wb') as handler:
+                    handler.write(image_data)
+                    handler.close()
+                file_names.append(file_name)
         return file_names[0]
     else:
         file_name = fix_characters(card["name"]) + card_style(card) + dupe_string
         file_url = card["image_uris"][size]
         file_name = file_name + '.' + get_ext(size)
-        image_data = requests.get(file_url).content
-        with open(file_name, 'wb') as handler:
-            handler.write(image_data)
-            handler.close()
+        if not os.path.exists(file_name):
+            image_data = requests.get(file_url).content
+            with open(file_name, 'wb') as handler:
+                handler.write(image_data)
+                handler.close()
         return file_name
-
+        
 def get_ext(size):
     if "png" in size:
         return "png"
@@ -324,17 +322,3 @@ def download_set_images(card_set):
         print("Downloaded: " + str(downloaded_filename))
     print("Work complete.")
     
-
-#download_set_images(sets.get_set("pip"))
-"""
-set_cards = sets.get_set_cards("unf",False)
-for card in set_cards:
-    dupes = find_dupes(card,set_cards)
-    card_path = get_lang_path(image_path,card)
-    dupe_string = ""
-    if dupes > 0:
-        dupe_string = " [" + str(dupes) + "]"
-    elif len(coll_num := collector_num_variant(card)) > 0:
-        dupe_string = " [" + coll_num + "]"
-    print(str(card["collector_number"]) + ", " + card["name"] + card_style(card) + dupe_string)
-"""
