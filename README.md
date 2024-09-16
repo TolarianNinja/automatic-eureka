@@ -7,6 +7,9 @@ Download all source files, run gui.py
 
 Changelog:
 
+v0.4.1
+No more console!  Everything is in the GUI.  Now with a progress bar.
+
 v0.4
 Images now show up in the GUI as they download
 
