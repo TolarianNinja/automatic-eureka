@@ -1,4 +1,4 @@
-import shutil, os, scrython, requests, sets,time
+import shutil, os, requests, sets,time
 from unidecode import unidecode
 
 image_path = "E:\\Programming Projects\\Python\\Automatic-Eureka\\Testing Dump\\"
@@ -242,10 +242,11 @@ def download_image(card,dupes,path,size,get_digital):
             return
     dupe_string = ""
     os.chdir(path)
-    if dupes > 0:
-        dupe_string = " [" + str(dupes) + "]"
-    if len(coll_num := collector_num_variant(card)) > 0:
-        dupe_string = " [" + coll_num + "]"
+    if card["set"] != "plst":
+        if dupes > 0:
+            dupe_string = " [" + str(dupes) + "]"
+        if len(coll_num := collector_num_variant(card)) > 0:
+            dupe_string = " [" + coll_num + "]"
     if card["layout"] == "transform" or card["layout"] == "modal_dfc" or card["layout"] == "reversible_card":
         file_names = []
         for i in range(0, 2):
@@ -264,7 +265,7 @@ def download_image(card,dupes,path,size,get_digital):
                 with open(file_name, 'wb') as handler:
                     handler.write(image_data)
                     handler.close()
-                file_names.append(file_name)
+            file_names.append(file_name)
         return file_names[0]
     else:
         file_name = fix_characters(card["name"]) + card_style(card) + dupe_string

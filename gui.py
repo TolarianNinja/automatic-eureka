@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter import font
 from PIL import ImageTk,Image
+import threading
 import sets, controller
 
 root = Tk()
@@ -11,8 +12,10 @@ root.iconbitmap('images/ninja_icon.ico')
 
 # Eris stores all the data and calls all the methods for that data
 eris = controller.Controller()
+hard_stop = False
 
 splash_path = "E:\\Programming Projects\\Python\\Automatic-Eureka\images\\splash.png"
+
 
 def donothing():
     return
@@ -29,30 +32,59 @@ Scrython library by NandaScott
     messagebox.showinfo(title="About Scryfall Image Downloader",
                         message=about_message)
 
+def startup():
+    load_set_cards()
+
 def button_click_start():
+    t = threading.Thread(target=start_process)
+    t.start()
+
+def button_click_settings():
+    """
+    window = Toplevel()
+    window.title('Settings')
+    window.geometry('700x500')
+
+    window.focus_set()
+    """
+    return
+
+def start_process():
+    global hard_stop
+    card_name = ""
     progress_bar['value'] = 0
     if len(eris.get_card_list()) == 0:
         root.event_generate("<<ComboboxSelected>>")
     download_path = eris.build_folders()
-    #last_card_image = image_label.
     progress_bar['maximum'] = eris.get_set_size()
     for card in eris.get_card_list():
-        if card["digital"]:
-            continue
-        card_name = eris.download_image(card,download_path)
-        if card_name == "":
-            image_text_string.set("Error when downloading (check console)" + card_name)
-            image_text_label.update()
+        if not hard_stop:
+            if card["digital"]:
+                continue
+            card_name = eris.download_image(card,download_path)
+            if card_name == "":
+                image_text_string.set("Error when downloading (check console)" + card_name)
+                image_text_label.update()
+            else:
+                card_path = eris.get_lang_path(card,download_path) + card_name
+                update_image(image_label,card_path,eris.get_image_size())
+                image_text_string.set("Downloaded " + card_name)
+                image_text_label.update()
+            progress_bar.step(1.0)
         else:
-            card_path = eris.get_lang_path(card,download_path) + card_name
-            update_image(image_label,card_path,eris.get_image_size())
-            image_text_string.set("Downloaded " + card_name)
-            image_text_label.update()
-        progress_bar.step(1.0)
-    complete_text = "Download of " + eris.get_set_name() + " completed successfully."
+            break
+    if hard_stop:
+        complete_text = "Download process stopped after " + card_name + "."
+        hard_stop = False
+    else:
+        complete_text = "Download of " + eris.get_set_name() + " completed successfully."
     progress_bar['value'] = 0
     image_text_string.set(complete_text)
     update_image(image_label,splash_path,"large")
+
+def button_click_stop():
+    global hard_stop
+    hard_stop = True
 
 def set_selected(self):
     set_code_text.set(get_code_selected())
@@ -60,7 +92,7 @@ def set_selected(self):
     eris.update_set(code_str)
     load_set_cards()
     eris.get_set_langs()
-    set_info = "Name: " + eris.get_set_name() + " | Set Code: " + code_str.upper() + " | Set Size: " + str(eris.get_set_size())
+    set_info = "Name: " + eris.get_set_name() + " | Set Code: " + code_str.upper()
     set_info_text.set(set_info)
 
 def load_set_cards():
@@ -106,7 +138,7 @@ def on_entry_key(self):
     if len(search_entry := sets_box.get()) > 0:
         sets_searched = []
         for c_set in sets_box['values']:
-            if search_entry in c_set.lower():
+            if search_entry.lower() in c_set.lower():
                 sets_searched.append(c_set)
         sets_box['values'] = sets_searched
     else:
@@ -137,29 +169,33 @@ frame_top = LabelFrame(main_frame, width=450, bd=2, text="Options")
 frame_top.grid(row=0, column=0)
 
 set_code_text = StringVar(frame_top)
-#set_size_text = StringVar(frame_top)
-#set_name_text = StringVar(frame_top)
 
 set_info_text = StringVar(frame_top)
 set_info_text.set("Set Name: " + eris.get_set_name() + " | Set Code: "
-                  + eris.get_set_code().upper() + " | Set Size: " + str(eris.get_set_size()))
+                  + eris.get_set_code().upper())
 
 # Combobox With List of Sets
-sets_box = ttk.Combobox(frame_top, width = 64, height = 23)
+sets_box = ttk.Combobox(frame_top, width = 50)
 sets_box['values'] = sets_list
 set_search_font = font.Font(root,family="Courier New",size=8)
 root.option_add("*TCombobox*Listbox*Font", set_search_font)
 
 # Info Label for Selected Set
-set_info_label = Label(frame_top, width=50, textvariable=set_info_text, justify="left", anchor="w")
+set_info_label = Label(frame_top, textvariable=set_info_text, justify="left", anchor="w")
 
 # RadioButton for selecting filtered or not
-radio_all = Radiobutton(frame_top, text = "All Sets", value = "all")
-radio_filtered = Radiobutton(frame_top, text = "Filtered", value = "filtered")
+#radio_all = Radiobutton(frame_top, text = "All Sets", value = "all")
+#radio_filtered = Radiobutton(frame_top, text = "Filtered", value = "filtered")
 
 # Start Button
 start_image = PhotoImage(file = r"images/start.png")
-get_set_button = Button(frame_top, command=button_click_start, image = start_image, width=29, height=36, pady=2)
+start_button = Button(frame_top, command=button_click_start, image = start_image, width=36, height=36)
+
+stop_image = PhotoImage(file = r"images/stop.png")
+stop_button = Button(frame_top, command=button_click_stop, image = stop_image, width=36, height=36)
+
+settings_image = PhotoImage(file = r"images/settings.png")
+settings_button = Button(frame_top, command=button_click_settings, image = settings_image, width=36, height=36)
 
 # Events
 sets_box.bind("<<ComboboxSelected>>", set_selected)
@@ -168,11 +204,13 @@ sets_box.bind("<KeyRelease>", on_entry_key)
 #radio_filtered.bind("<<RadiobuttonSelected>>", set_box_select_filter)
 
 # Top Frame Grid Sets
-sets_box.grid(row=0, column=0, columnspan=4)
-set_info_label.grid(sticky = "W", row=1, column=0, columnspan=2)
+sets_box.grid(sticky = "W", row=0, column=0)
+set_info_label.grid(sticky = "W", row=1, column=0)
 #radio_all.grid(row=1, column=2)
 #radio_filtered.grid(row=1, column=3)
-get_set_button.grid(row=0, column=4, rowspan=2)
+start_button.grid(row=0, column=1, rowspan=2, sticky = "W")
+stop_button.grid(row=0, column=2, rowspan=2, sticky = "W")
+settings_button.grid(row=0, column=3, rowspan=2, sticky = "W")
 
 # Bottom Frame
 frame_bottom = LabelFrame(main_frame, width=450, height=630, bd=2, text="Downloaded Image")
@@ -185,7 +223,7 @@ image_label = Label(frame_bottom, image=side_image, height=615, width=441)
 # Info Label for Downloaded Image
 image_text_string = StringVar(frame_bottom)
 image_text_label = Label(frame_bottom, textvariable=image_text_string)
-image_text_string.set("You are reading me type.")
+image_text_string.set("Select a set from the drop down.  Enter text to filter by name or set code.")
 
 # Bottom Frame Grid Sets
 image_label.grid(row=0, column=0)
@@ -195,5 +233,7 @@ image_text_label.grid(row=1, column=0)
 progress_bar = ttk.Progressbar(frame_bottom, length=445)
 progress_bar.grid(row=2, column=0)
 
+# Startups
+startup()
 root.config(menu=menu_bar)
 root.mainloop()

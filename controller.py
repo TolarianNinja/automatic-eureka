@@ -17,10 +17,9 @@ class Controller:
         self.current_set_name = self.current_set["name"]
         self.current_set_code = self.current_set["code"]
         self.current_set_size = self.current_set["card_count"]
-        self.card_list = [] #sets.get_set_cards(self.current_set_code,True)
+        self.card_list = [] 
         self.set_languages_nf = []
         self.set_languages_f = []
-        #self.file_names = []
         self.download_path = "E:\Programming Projects\Python\Automatic-Eureka\Testing Dump\\"
         self.use_png = False
         self.include_digital = True
@@ -38,8 +37,6 @@ class Controller:
         self.current_set_name = self.current_set["name"]
         self.current_set_size = self.current_set["card_count"]
         self.card_list = []
-        #self.set_languages_nf = sets.get_set_languages(self.card_list,False)
-        #self.set_languages_f = sets.get_set_languages(self.card_list,True)
 
     def get_set_langs(self):
         self.set_languages_nf = sets.get_set_languages(self.card_list,False)
