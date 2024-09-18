@@ -8,9 +8,6 @@ def card_style(card):
     variant_foil = False
     if "sld" in card["set"]:
         return " [" + str(col_num_prefix(card)) + "]"
-    if "type_line" in card:
-        if "Basic" in card["type_line"]:
-            return card_style
     if card["promo"]:
         if len(card_style := is_set_promo(card)) > 0:
             return " [" + card_style + "]"
@@ -31,6 +28,8 @@ def card_style(card):
 
 def is_borderless(card,variant_foil,card_style):
     version = ""
+    if "art_series" in card["layout"]:
+        return card_style
     if "borderless" in card["border_color"]:
         version = "Alt Art"
     if len(version) > 0:
@@ -152,6 +151,7 @@ def build_folders(path,set_name,langs_nf,langs_f):
 
 # Finds if there are multiple cards with the same output name.
 # If no return 0, else return which instance this is (second Plains will be 2)
+# Ignore Secret Lair (sld) and collector numbers with 'z' (serialized)
 def find_dupes(card,card_list):
     card_count = 1
     dup_found = False
@@ -160,16 +160,17 @@ def find_dupes(card,card_list):
     if 'z' in card["collector_number"]:
         return 0
     card_name = fix_characters(card["name"]) + card_style(card)
-    card_num = remove_non_num(card["collector_number"])
     for loop_card in card_list:
         if 'z' in loop_card["collector_number"]:
-            return 0
+            continue
         loop_name = fix_characters(loop_card["name"]) + card_style(loop_card)
-        loop_num = remove_non_num(loop_card["collector_number"])
-        if card_name == loop_name and card_num != loop_num and card["lang"] == loop_card["lang"]:# and card["finishes"] == loop_card["finishes"]:
-            dup_found = True
-            if card_num > loop_num:
-                card_count = card_count + 1
+        if card_name == loop_name:
+            if card["collector_number"] != loop_card["collector_number"]:
+                card_num = remove_non_num(card["collector_number"])
+                loop_num = remove_non_num(loop_card["collector_number"])
+                dup_found = True
+                if card_num > loop_num:
+                    card_count = card_count + 1
     if dup_found:
         return card_count
     else:
@@ -247,7 +248,7 @@ def download_image(card,dupes,path,size,get_digital):
             dupe_string = " [" + str(dupes) + "]"
         if len(coll_num := collector_num_variant(card)) > 0:
             dupe_string = " [" + coll_num + "]"
-    if card["layout"] == "transform" or card["layout"] == "modal_dfc" or card["layout"] == "reversible_card":
+    if "card_faces" in card["layout"] == "transform" or card["layout"] == "modal_dfc" or card["layout"] == "reversible_card" or card["layout"] == "art_series":
         file_names = []
         for i in range(0, 2):
             if card["layout"] == "reversible card":
@@ -255,7 +256,7 @@ def download_image(card,dupes,path,size,get_digital):
                     side = 'a'
                 else:
                     side = 'b'
-                file_name = file_name = fix_characters(card["card_faces"][i]["name"]) + " [" + str(card["collector_number"]) + side + "]"
+                file_name = fix_characters(card["card_faces"][i]["name"]) + " [" + str(card["collector_number"]) + side + "]"
             else:
                 file_name = fix_characters(card["card_faces"][i]["name"]) + card_style(card) + dupe_string
             file_url = card["card_faces"][i]["image_uris"][size]

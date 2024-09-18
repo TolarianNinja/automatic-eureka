@@ -12,6 +12,8 @@ root.iconbitmap('images/ninja_icon.ico')
 
 # Eris stores all the data and calls all the methods for that data
 eris = controller.Controller()
+
+# Used for the stop button
 hard_stop = False
 
 splash_path = "E:\\Programming Projects\\Python\\Automatic-Eureka\images\\splash.png"
@@ -40,13 +42,83 @@ def button_click_start():
     t.start()
 
 def button_click_settings():
-    """
     window = Toplevel()
     window.title('Settings')
-    window.geometry('700x500')
+    window.geometry('453x375')
+
+    # Entry for download path
+    settings_frame_path = LabelFrame(window, bd=2, text="Download Path", width=465, padx=5, pady=5, labelanchor='nw')
+    settings_frame_path.grid(row=0, column=0, sticky=W)
+    settings_download_path_string = StringVar()
+    settings_download_path_string.set(eris.get_download_path())
+    settings_download_path_entry = Entry(settings_frame_path, justify=LEFT, width=68, textvariable=settings_download_path_string)
+    settings_download_path_entry.grid(row=0, column=0)
+    
+    # Folder open for download path with icon
+    settings_download_directory_image = PhotoImage(file = r"images/selectdir.png")
+    settings_download_directory_button = Button(settings_frame_path, command=donothing, image = settings_download_directory_image, width=16, height=16)
+    settings_download_directory_button.grid(row=0, column=1)
+    
+    # Image size radio buttons
+    settings_frame_size = LabelFrame(window, bd=2, text="Image Size", width=465, padx=5, pady=5)
+    settings_frame_size.grid(row=1, column=0, sticky=W)
+    settings_size = StringVar()
+    settings_size_radio_small = Radiobutton(settings_frame_size, text="Small", variable=settings_size, value="small", width=6)
+    settings_size_radio_normal = Radiobutton(settings_frame_size, text="Normal", variable=settings_size, value="normal", width=6)
+    settings_size_radio_large = Radiobutton(settings_frame_size, text="Large", variable=settings_size, value="large", width=6)
+    settings_size_radio_png = Radiobutton(settings_frame_size, text="PNG", variable=settings_size, value="png", width=5)
+    settings_size_radio_art_crop = Radiobutton(settings_frame_size, text="Art Crop", variable=settings_size, value="art_crop", width=6)
+    settings_size_radio_border_crop = Radiobutton(settings_frame_size, text="Border Crop", variable=settings_size, value="border_crop", width=9)
+    settings_size_radio_small.grid(row=0, column=0, sticky=W)
+    settings_size_radio_normal.grid(row=0, column=1, sticky=W)
+    settings_size_radio_large.grid(row=0, column=2, sticky=W)
+    settings_size_radio_png.grid(row=0, column=3, sticky=W)
+    settings_size_radio_art_crop.grid(row=0, column=4, sticky=W)
+    settings_size_radio_border_crop.grid(row=0, column=5, sticky=W)
+    settings_size.set(eris.get_image_size())
+    
+
+    # Set type filter checkbox list
+    settings_frame_filters = LabelFrame(window, bd=2, text="Types of Set Listed", width=465, padx=5, pady=5)
+    settings_frame_filters.grid(row=2, column=0, sticky=W)
+    settings_filter_checkbox_core = Checkbutton(settings_frame_filters, text="Core Sets").grid(row=0, column=0, sticky=W)
+    settings_filter_checkbox_expansion = Checkbutton(settings_frame_filters, text="Expansions").grid(row=0, column=1, sticky=W)
+    settings_filter_checkbox_draftinno = Checkbutton(settings_frame_filters, text="Draft Innovation").grid(row=0, column=2, sticky=W)
+    settings_filter_checkbox_commander = Checkbutton(settings_frame_filters, text="Commander").grid(row=0, column=3, sticky=W)
+    settings_filter_checkbox_masters = Checkbutton(settings_frame_filters, text="Masters").grid(row=1, column=0, sticky=W)
+    settings_filter_checkbox_arsenal = Checkbutton(settings_frame_filters, text="Arsenal").grid(row=1, column=1, sticky=W)
+    settings_filter_checkbox_ftv = Checkbutton(settings_frame_filters, text="From the Vault").grid(row=1, column=2, sticky=W)
+    settings_filter_checkbox_spellbook = Checkbutton(settings_frame_filters, text="Spellbook").grid(row=1, column=3, sticky=W)
+    settings_filter_checkbox_premiumdeck = Checkbutton(settings_frame_filters, text="Premium Deck Series").grid(row=2, column=0, sticky=W)
+    settings_filter_checkbox_dueldeck = Checkbutton(settings_frame_filters, text="Duel Decks").grid(row=2, column=1, sticky=W)
+    settings_filter_checkbox_starter = Checkbutton(settings_frame_filters, text="Starter").grid(row=2, column=2, sticky=W)
+    settings_filter_checkbox_box = Checkbutton(settings_frame_filters, text="Box").grid(row=2, column=3, sticky=W)
+    settings_filter_checkbox_planechase = Checkbutton(settings_frame_filters, text="Planechase").grid(row=3, column=0, sticky=W)
+    settings_filter_checkbox_archenemy = Checkbutton(settings_frame_filters, text="Archenemy").grid(row=3, column=1, sticky=W)
+    settings_filter_checkbox_vanguard = Checkbutton(settings_frame_filters, text="Vanguard").grid(row=3, column=2, sticky=W)
+    settings_filter_checkbox_funny = Checkbutton(settings_frame_filters, text="Funny").grid(row=3, column=3, sticky=W)
+    settings_filter_checkbox_promo = Checkbutton(settings_frame_filters, text="Promo").grid(row=4, column=0, sticky=W)
+    settings_filter_checkbox_token = Checkbutton(settings_frame_filters, text="Token").grid(row=4, column=1, sticky=W)
+    settings_filter_checkbox_memorabilia = Checkbutton(settings_frame_filters, text="Memorabilia").grid(row=4, column=2, sticky=W)
+    settings_filter_checkbox_minigame = Checkbutton(settings_frame_filters, text="Minigame").grid(row=4, column=3, sticky=W)
+
+    settings_filter_checkbox_digital = Checkbutton(settings_frame_filters, text="Digital Cards").grid(row=5, column=0, sticky=W)
+    settings_filter_checkbox_alchemy = Checkbutton(settings_frame_filters, text="Alchemy").grid(row=5, column=1, sticky=W)
+    settings_filter_checkbox_treasure = Checkbutton(settings_frame_filters, text="Treasure Chest").grid(row=5, column=2, sticky=W)
+
+    settings_frame_other_settings = LabelFrame(window, bd=2, text="Other Settings", width=59, padx=5, pady=5)
+    settings_frame_other_settings.grid(row=3, column=0, sticky=W)
+    settings_get_digital_checkbox = Checkbutton(settings_frame_other_settings, text="Digital cards in paper sets", width=28, justify="left").grid(row=0, column=0, sticky=W)
+    settings_button_reset_default = Button(settings_frame_other_settings, text="Reset to defaults", width=28).grid(row=0, column=1, sticky=E)
+
+    settings_frame_close = LabelFrame(window, bd=0, width=465, padx=5, pady=5)
+    settings_frame_close.grid(row=4, column=0, sticky=E)
+    settings_button_okay = Button(settings_frame_close, command=donothing, text="Okay")
+    settings_button_cancel = Button(settings_frame_close, command=window.destroy, text="Cancel")
+    settings_button_okay.grid(row=0, column=0)
+    settings_button_cancel.grid(row=0, column=1)
 
     window.focus_set()
-    """
     return
 
 def start_process():
@@ -165,7 +237,7 @@ main_frame = Frame(root, height=700, width=500, bd=2)
 main_frame.pack()
 
 # Top Frame
-frame_top = LabelFrame(main_frame, width=450, bd=2, text="Options")
+frame_top = LabelFrame(main_frame, width=450, bd=2, text="Set Information")
 frame_top.grid(row=0, column=0)
 
 set_code_text = StringVar(frame_top)
@@ -175,13 +247,14 @@ set_info_text.set("Set Name: " + eris.get_set_name() + " | Set Code: "
                   + eris.get_set_code().upper())
 
 # Combobox With List of Sets
-sets_box = ttk.Combobox(frame_top, width = 50)
+sets_box = ttk.Combobox(frame_top, width = 50, height = 23)
 sets_box['values'] = sets_list
 set_search_font = font.Font(root,family="Courier New",size=8)
 root.option_add("*TCombobox*Listbox*Font", set_search_font)
 
 # Info Label for Selected Set
-set_info_label = Label(frame_top, textvariable=set_info_text, justify="left", anchor="w")
+set_info_label = Label(frame_top, textvariable=set_info_text, justify="left", anchor="w", width=45)
+set_info_label.lower()
 
 # RadioButton for selecting filtered or not
 #radio_all = Radiobutton(frame_top, text = "All Sets", value = "all")
