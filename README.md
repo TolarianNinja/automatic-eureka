@@ -7,6 +7,9 @@ Download all source files, run gui.py
 
 Changelog:
 
+v0.5
+Settings menu built, no functionality (except cancel closing the window) yet.
+
 v0.4.2
 GUI improvements
 
