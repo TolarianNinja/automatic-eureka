@@ -58,15 +58,74 @@ def get_sets_full():
 
 # Filters the full list of sets to remove anything that is not a printed (paper)
 # set of legal cards (ie: no tokens, oversized, inserts, etc)
-def get_sets_filtered(set_list_full):
+def get_sets_filtered(set_list_full,filters):
     set_list_filtered = []
     set_types = []
     for c_set in set_list_full:
         match c_set["set_type"]:
-            case "memorabilia" | "minigame" | "token":
-                continue
-            case "vanguard" | "planechase" | "archenemy":
-                continue
+            case "core":
+                if filters[0]:
+                    set_list_filtered.append(c_set)
+            case "expansion":
+                if filters[1]:
+                    set_list_filtered.append(c_set)
+            case "draft_innovation":
+                if filters[2]:
+                    set_list_filtered.append(c_set)
+            case "commander":
+                if filters[3]:
+                    set_list_filtered.append(c_set)
+            case "masters":
+                if filters[4]:
+                    set_list_filtered.append(c_set)
+            case "arsenal":
+                if filters[5]:
+                    set_list_filtered.append(c_set)
+            case "from_the_vault":
+                if filters[6]:
+                    set_list_filtered.append(c_set)
+            case "spellbook":
+                if filters[7]:
+                    set_list_filtered.append(c_set)
+            case "premium_deck":
+                if filters[8]:
+                    set_list_filtered.append(c_set)
+            case "starter":
+                if filters[9]:
+                    set_list_filtered.append(c_set)
+            case "box":
+                if filters[10]:
+                    set_list_filtered.append(c_set)
+            case "planechase":
+                if filters[11]:
+                    set_list_filtered.append(c_set)
+            case "archenemy":
+                if filters[12]:
+                    set_list_filtered.append(c_set)
+            case "vanguard":
+                if filters[13]:
+                    set_list_filtered.append(c_set)
+            case "funny":
+                if filters[14]:
+                    set_list_filtered.append(c_set)
+            case "promo":
+                if filters[15]:
+                    set_list_filtered.append(c_set)
+            case "token":
+                if filters[16]:
+                    set_list_filtered.append(c_set)
+            case "memorabilia":
+                if filters[17]:
+                    set_list_filtered.append(c_set)
+            case "minigame":
+                if filters[18]:
+                    set_list_filtered.append(c_set)
+            case "alchemy":
+                if filters[19]:
+                    set_list_filtered.append(c_set)
+            case "treasure_chest":
+                if filters[20]:
+                    set_list_filtered.append(c_set)
             case _:
                 if not c_set["digital"]:
                     set_list_filtered.append(c_set)

@@ -1,4 +1,4 @@
-import dloader, sets, scrython, time
+import dloader, sets, scrython, time, os
 
 # set_list              The list of sets
 # current_set           The current set (JSON) that is loaded
@@ -12,7 +12,6 @@ import dloader, sets, scrython, time
 class Controller:
     def __init__(self):
         self.set_list = sets.get_sets_full()
-        self.set_list_filtered = sets.get_sets_filtered(self.set_list)
         self.current_set = self.set_list[0]
         self.current_set_name = self.current_set["name"]
         self.current_set_code = self.current_set["code"]
@@ -24,8 +23,9 @@ class Controller:
         #self.use_png = False
         self.include_digital = True
         self.image_size = "large"
-        self.set_type_filters = []
+        self.set_type_filters = self.get_default_filters()
         self.rate_limit = 0.23
+        self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters)
 
     def __str__(self):
         return str(self.current_set["name"])
@@ -161,8 +161,36 @@ class Controller:
     def save_settings_file():
         return
 
-    def get_set_type_filters():
+    def get_set_type_filters(self):
         return self.set_type_filters
 
-    def get_include_digital():
+    def get_include_digital(self):
         return self.include_digital
+
+    def get_defaults(self):
+        settings = []
+        default_path = os.getcwd() + "\\Downloads\\"
+        size = "large"
+        set_filters = [ 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 0, 0, 0, 0,
+                        1, 0, 0, 0, 0, 0 ]
+        get_digital = False
+        settings.append(default_path)
+        settings.append(size)
+        settings.append(set_filters)
+        settings.append(get_digital)
+        return settings
+
+    def get_default_path(self):
+        return os.getcwd() + "\\Downloads\\"
+
+    def get_default_size(self):
+        return "large"
+
+    def get_default_filters(self):
+        return [ 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 0, 0, 0, 0,
+                1, 0, 0, 0, 0, 0 ]
+
+    def get_default_digital(self):
+        return False
