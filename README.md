@@ -1,4 +1,4 @@
-Automatic Eureka v0.4, by Tolarian Ninja
+Automatic Eureka v0.5.1, by Tolarian Ninja
 
 Automatic Eureka is a tool written in Python to download images of a specific set from Scryfall.
 It is an updated (with GUI! and other things!) version of the Bag of Tricks file Scrython Image Downloader.py
@@ -6,6 +6,9 @@ It is an updated (with GUI! and other things!) version of the Bag of Tricks file
 Download all source files, run gui.py
 
 Changelog:
+
+v0.5.1
+Updates to settings menu, cleaned up some of GUI code
 
 v0.5
 Settings menu built, no functionality (except cancel closing the window) yet.
