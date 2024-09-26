@@ -87,6 +87,8 @@ def is_set_foil(card):
         card_style = "Embossed"
     elif "galaxyfoil" in card["promo_types"]:
         card_style = "Galaxy Foil"
+    elif "fracturefoil" in card["promo_types"]:
+        card_style = "Fracture"
     elif "gilded" in card["promo_types"]:
         card_style = "Gilded"
     elif "halofoil" in card["promo_types"]:
@@ -248,7 +250,8 @@ def download_image(card,dupes,path,size,get_digital):
             dupe_string = " [" + str(dupes) + "]"
         if len(coll_num := collector_num_variant(card)) > 0:
             dupe_string = " [" + coll_num + "]"
-    if "card_faces" in card["layout"] == "transform" or card["layout"] == "modal_dfc" or card["layout"] == "reversible_card" or card["layout"] == "art_series":
+    if card["layout"] == "transform" or card["layout"] == "modal_dfc" or card["layout"] == "reversible_card" or card["layout"] == "art_series":
+    #if "card_faces" in card:        
         file_names = []
         for i in range(0, 2):
             if card["layout"] == "reversible card":

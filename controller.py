@@ -21,7 +21,7 @@ class Controller:
         self.set_languages_f = []
         self.download_path = "E:\Programming Projects\Python\Automatic-Eureka\Testing Dump\\"
         #self.use_png = False
-        self.include_digital = True
+        self.include_digital = 0
         self.image_size = "large"
         self.set_type_filters = self.get_default_filters()
         self.rate_limit = 0.23
@@ -139,16 +139,16 @@ class Controller:
         time.sleep(self.get_rate_limit())
         return self.card_list
 
-    def set_download_path(path):
+    def set_download_path(self, path):
         self.download_path = path
 
-    def set_image_size(size):
+    def set_image_size(self, size):
         self.image_size = size
 
-    def set_set_type_filters(filters):
+    def set_set_type_filters(self, filters):
         self.set_type_filters = filters
 
-    def set_include_digital(get_digital):
+    def set_include_digital(self, get_digital):
         self.include_digital = get_digital
 
     def save_settings(path,size,filters,get_digital):
@@ -174,7 +174,7 @@ class Controller:
         set_filters = [ 1, 1, 1, 1, 1, 1, 1, 1,
                         1, 1, 1, 1, 0, 0, 0, 0,
                         1, 0, 0, 0, 0, 0 ]
-        get_digital = False
+        get_digital = 0
         settings.append(default_path)
         settings.append(size)
         settings.append(set_filters)
@@ -193,4 +193,4 @@ class Controller:
                 1, 0, 0, 0, 0, 0 ]
 
     def get_default_digital(self):
-        return False
+        return 0
