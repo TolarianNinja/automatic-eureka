@@ -31,7 +31,6 @@ def get_set_cards(set_code,quiet):
         if search.has_more():
             page_count = page_count + 1;
         if not search.has_more():
-            print("")
             return card_list
 
 # Used for console output of get_set_cards function.
@@ -64,71 +63,77 @@ def get_sets_filtered(set_list_full,filters):
     for c_set in set_list_full:
         match c_set["set_type"]:
             case "core":
-                if filters[0]:
+                if filters[0] == 1:
                     set_list_filtered.append(c_set)
             case "expansion":
-                if filters[1]:
+                if filters[1] == 1:
                     set_list_filtered.append(c_set)
             case "draft_innovation":
-                if filters[2]:
+                if filters[2] == 1:
                     set_list_filtered.append(c_set)
             case "commander":
-                if filters[3]:
+                if filters[3] == 1:
                     set_list_filtered.append(c_set)
             case "masters":
-                if filters[4]:
+                if filters[4] == 1:
                     set_list_filtered.append(c_set)
             case "arsenal":
-                if filters[5]:
+                if filters[5] == 1:
                     set_list_filtered.append(c_set)
             case "from_the_vault":
-                if filters[6]:
+                if filters[6] == 1:
                     set_list_filtered.append(c_set)
             case "spellbook":
-                if filters[7]:
+                if filters[7] == 1:
                     set_list_filtered.append(c_set)
             case "premium_deck":
-                if filters[8]:
+                if filters[8] == 1:
                     set_list_filtered.append(c_set)
             case "starter":
-                if filters[9]:
+                if filters[9] == 1:
                     set_list_filtered.append(c_set)
             case "box":
-                if filters[10]:
+                if filters[10] == 1:
+                    set_list_filtered.append(c_set)
+            case "masterpiece":
+                if filters[11] == 1:
+                    set_list_filtered.append(c_set)
+            case "duel_deck":
+                if filters[12] == 1:
                     set_list_filtered.append(c_set)
             case "planechase":
-                if filters[11]:
+                if filters[13] == 1:
                     set_list_filtered.append(c_set)
             case "archenemy":
-                if filters[12]:
+                if filters[14] == 1:
                     set_list_filtered.append(c_set)
             case "vanguard":
-                if filters[13]:
+                if filters[15] == 1:
                     set_list_filtered.append(c_set)
             case "funny":
-                if filters[14]:
+                if filters[16] == 1:
                     set_list_filtered.append(c_set)
             case "promo":
-                if filters[15]:
+                if filters[17] == 1:
                     set_list_filtered.append(c_set)
             case "token":
-                if filters[16]:
+                if filters[18] == 1:
                     set_list_filtered.append(c_set)
             case "memorabilia":
-                if filters[17]:
+                if filters[19] == 1:
                     set_list_filtered.append(c_set)
             case "minigame":
-                if filters[18]:
+                if filters[20] == 1:
                     set_list_filtered.append(c_set)
             case "alchemy":
-                if filters[19]:
+                if filters[21] == 1:
                     set_list_filtered.append(c_set)
             case "treasure_chest":
-                if filters[20]:
+                if filters[22] == 1:
                     set_list_filtered.append(c_set)
             case _:
-                if not c_set["digital"]:
-                    set_list_filtered.append(c_set)
+                print(c_set)
+                set_list_filtered.append(c_set)
     return set_list_filtered
 
 

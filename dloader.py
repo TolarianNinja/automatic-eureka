@@ -6,54 +6,82 @@ image_path = "E:\\Programming Projects\\Python\\Automatic-Eureka\\Testing Dump\\
 def card_style(card):
     card_style = ""
     variant_foil = False
-    if "sld" in card["set"]:
-        return " [" + str(col_num_prefix(card)) + "]"
+    # Secret Lair has version checked with collector number, same with some specific cards
+    if "sld" in card["set"] or fix_characters(card["name"]) == "Nazgul":
+        return str(col_num_prefix(card))
     if card["promo"]:
         if len(card_style := is_set_promo(card)) > 0:
-            return " [" + card_style + "]"
+            return card_style
     elif "promo_types" in card:
         if len(card_style := is_variant_foil(card)) > 0:
             variant_foil = True
         elif len(card_style := is_set_foil(card)) > 0:
-            return " [" + card_style + "]"
+            return card_style
     if "frame_effects" in card:
         if len(card_style := is_variant(card,variant_foil,card_style)) > 0:
-            return " [" + card_style + "]"
+            return card_style
     if len(card_style := is_borderless(card,variant_foil,card_style)) > 0:
-        return " [" + card_style + "]"
+        return card_style
     if len(card_style) > 0:
-        return " [" + card_style + "]"
+        return card_style
     else:
         return card_style
 
 def is_borderless(card,variant_foil,card_style):
     version = ""
+    # Masterpiece sets will all have the same fancy format (everything special == nothing is)
+    if card["set_type"] == "masterpiece":
+        return card_style
     if "art_series" in card["layout"]:
         return card_style
     if "borderless" in card["border_color"]:
-        version = "Alt Art"
+        # Checking specifically for scene cards from ltr, will remove set check if this returns
+        if card["set"] == "ltr" and "frame_effects" in card and "inverted" in card["frame_effects"]:
+            version = "Scene"            
+        else:
+            version = "Alt Art"
     if len(version) > 0:
         if variant_foil:
             return card_style + " " + version
         else:
             return version
+    elif variant_foil and card["set"] == "unf":
+        return card_style + " Foil"
     return card_style
                
 def is_variant(card,variant_foil,card_style):
     version = ""
+    # everything special == nothing is
+    if card["set_type"] == "masterpiece":
+        return card_style
     if "extendedart" in card["frame_effects"]:
         version = "Ext Art"
     elif "showcase" in card["frame_effects"]:
-        version = "Showcase"
+        # Checking specifically for the ring showcase cards from ltr
+        if card["set"] == "ltr" and "promo_types" in card and "scroll" not in card["promo_types"]:
+            version = "Ring"
+        else:
+            version = "Showcase"
     elif "etched" in card["frame_effects"]:
         version = "Etched"
+    if variant_foil:
+        # More ltr specific fixes
+        if card["set"] == "ltr":
+            return card_style
     if len(version) > 0:
         if variant_foil:
-            return card_style + " " + version
+            # Magic Album has these backwards for Unfinity
+            if card["set"] == "unf":
+                return version + " " + card_style
+            else:
+                return card_style + " " + version
         else:
             return version
     else:
-        return card_style
+        if card["set"] == "unf" and variant_foil:
+            return card_style + " Foil"
+        else:
+            return card_style
 
 def is_variant_foil(card):
     card_style = ""
@@ -61,6 +89,8 @@ def is_variant_foil(card):
         card_style = "Surge"
     elif "galaxyfoil" in card["promo_types"]:
         card_style = "Galaxy"
+    elif "ripplefoil" in card["promo_types"]:
+        card_style = "Ripple"
     return card_style
 
 def is_set_promo(card):
@@ -70,7 +100,7 @@ def is_set_promo(card):
             card_style = "S"
         elif "stamped" in card["promo_types"]:
             card_style = "P"
-        elif "promopack" in card["promo_types"] or "bundle" in card["promo_types"]:
+        elif "promopack" in card["promo_types"] or "bundle" in card["promo_types"] or "playpromo" in card["promo_types"] or "buyabox" in card["promo_types"]:
             card_style = "Promo"
     return card_style
             
@@ -79,6 +109,8 @@ def is_set_foil(card):
         card_style = "Compleat"
     elif "confettifoil" in card["promo_types"]:
         card_style = "Confetti"
+    elif "textured" in card["promo_types"]:
+        card_style = "Textured"
     elif "invisibleink" in card["promo_types"]:
         card_style = "Invisible Ink"
     elif "dossier" in card["promo_types"]:
@@ -99,8 +131,10 @@ def is_set_foil(card):
         card_style = "Oil"
     elif "rainbowfoil" in card["promo_types"]:
         card_style = "Rainbow"
-    elif "textured" in card["promo_types"]:
-        card_style = "Textured"
+    elif "raisedfoil" in card["promo_types"]:
+        card_style = "Raised"
+    elif "portrait" in card["promo_types"]:
+        card_style = "Profile"
     elif "1997" in card["frame"] and "boosterfun" in card["promo_types"]:
         card_style = "Retro"
     else:
@@ -119,6 +153,10 @@ def col_num_prefix(card):
     elif col_num < 100:
         output = "0" + str(col_num)
     return output
+"""
+    elif col_num < 1000:
+        output = "0" + str(col_num)
+"""
 
 def fix_characters(card_name):
     current_file = str(card_name)
@@ -131,6 +169,13 @@ def fix_characters(card_name):
     if "?" in current_file:
         current_file = str(current_file).replace("?", "")
     current_file = unidecode(current_file)
+    # Magic Album file name fix for Unfinity Name Sticker cards
+    if "_____ _____ _____" in current_file:
+        return current_file
+    elif "_____ _____" in current_file:
+        current_file = str(current_file).replace("_____", "______")
+    elif "_____" in current_file:
+        current_file = str(current_file).replace("_____", "________")
     return current_file
 
 def fix_set_name(name):
@@ -167,7 +212,7 @@ def find_dupes(card,card_list):
             continue
         loop_name = fix_characters(loop_card["name"]) + card_style(loop_card)
         if card_name == loop_name:
-            if card["collector_number"] != loop_card["collector_number"]:
+            if is_dupe(card,loop_card):
                 card_num = remove_non_num(card["collector_number"])
                 loop_num = remove_non_num(loop_card["collector_number"])
                 dup_found = True
@@ -178,6 +223,17 @@ def find_dupes(card,card_list):
     else:
         return 0
 
+# The number of things to check against to be sure that it's a 'true' duplicate moved
+# it into its own function.
+def is_dupe(card,loop_card):
+    if card["collector_number"] != loop_card["collector_number"]:
+        if card["nonfoil"] == loop_card["nonfoil"]:
+            if card["foil"] == loop_card["foil"]:
+                if card["lang"] == loop_card["lang"]:
+                    return True
+    return False
+                
+
 # Removes non-numeric characters from collector numbers.  Used to compare the numbers.
 def remove_non_num(number):
     output = ''.join(c for c in number if c.isdigit())
@@ -186,7 +242,7 @@ def remove_non_num(number):
     else:
         return output
 
-# Checks the set 
+# Checks every card in the set to find the languages for foil or nonfoil cards.
 def get_set_languages(card_list,is_foil):
     languages = []
     for card in card_list:
@@ -200,6 +256,7 @@ def get_set_languages(card_list,is_foil):
                     languages.append(card_lang)
     return languages
 
+# Changes the input from Scryfall data to the expected file path for Magic Album.
 def fix_lang(lang):
     match lang:
         case "en":
@@ -229,39 +286,43 @@ def fix_lang(lang):
         case _:
             return "ENG"
 
+# Used to find the non-numeric character in collector number variants (RIP Neon Mana Crypt)
 def collector_num_variant(card):
+    if card["set"] == "sld":
+        return ""
     try:
         coll_num = int(card["collector_number"])
         return ""
     except ValueError:
-        if card["collector_number"][-1] in "psz":
+        # planeswalker stamp, date stamp, serialized, foil
+        if card["collector_number"][-1] in "psz★":
             return ""
         else:
             return card["collector_number"][-1]
 
+# Let's actually download the image!  This is slowly getting refactored to be less of a clusterfuck.
 def download_image(card,dupes,path,size,get_digital):
     if card["digital"]:
         if not get_digital:
             return
     dupe_string = ""
     os.chdir(path)
-    if card["set"] != "plst":
-        if dupes > 0:
-            dupe_string = " [" + str(dupes) + "]"
-        if len(coll_num := collector_num_variant(card)) > 0:
-            dupe_string = " [" + coll_num + "]"
-    if card["layout"] == "transform" or card["layout"] == "modal_dfc" or card["layout"] == "reversible_card" or card["layout"] == "art_series":
-    #if "card_faces" in card:        
+    if two_face(card):
         file_names = []
         for i in range(0, 2):
+            """
             if card["layout"] == "reversible card":
                 if i == 0:
                     side = 'a'
                 else:
                     side = 'b'
-                file_name = fix_characters(card["card_faces"][i]["name"]) + " [" + str(card["collector_number"]) + side + "]"
+                file_name = build_filename_faces(card,dupes,i) + "[" + side + "]"
             else:
-                file_name = fix_characters(card["card_faces"][i]["name"]) + card_style(card) + dupe_string
+            """
+            if card["layout"] == "reversible_card":
+                file_name = build_filename_reversible(card,dupes,i)
+            else:
+                file_name = build_filename_faces(card,dupes,i)
             file_url = card["card_faces"][i]["image_uris"][size]
             file_name = file_name + '.' + get_ext(size)
             if not os.path.exists(file_name):
@@ -272,7 +333,7 @@ def download_image(card,dupes,path,size,get_digital):
             file_names.append(file_name)
         return file_names[0]
     else:
-        file_name = fix_characters(card["name"]) + card_style(card) + dupe_string
+        file_name = build_filename(card,dupes)
         file_url = card["image_uris"][size]
         file_name = file_name + '.' + get_ext(size)
         if not os.path.exists(file_name):
@@ -281,32 +342,102 @@ def download_image(card,dupes,path,size,get_digital):
                 handler.write(image_data)
                 handler.close()
         return file_name
-        
+
+# Returns the file extension based on image_size (everything except PNG is JPG)
 def get_ext(size):
     if "png" in size:
         return "png"
     else:
         return "jpg"
 
+# Builds the filename and appropriately places brackets based on dupes of card styles
+def build_filename(card,dupes):
+    if "flavor_name" in card and not card["reprint"]:
+        card_name = fix_characters(card["flavor_name"])
+    else:
+        card_name = fix_characters(card["name"])
+    c_style = card_style(card)
+    coll_variant = collector_num_variant(card)
+    # if variant + coll_num variant + dupe
+    if dupes > 0 and len(c_style) > 0 and len(coll_variant) > 0:
+        card_name = card_name + " [" + c_style + " " + coll_variant + " " + str(dupes) + "]"
+    # if variant + dupe
+    elif dupes > 0 and len(c_style) > 0:
+        card_name = card_name + " [" + c_style + " " + str(dupes) + "]"
+    # if variant + coll_num variant
+    elif len(c_style) > 0 and len(coll_variant) > 0:
+        card_name = card_name + " [" + c_style + "" + coll_variant + "]"
+        print("Card Name: " + card["name"] + " Card Number: \"" + str(card["collector_number"]) + "\"")
+    # if dupe + coll_num variant
+    elif dupes > 0 and len(coll_variant) > 0:
+        card_name = card_name + " [" + coll_variant + " " + dupes + "]"
+    # if dupe
+    elif dupes > 0:
+        card_name = card_name + " [" + str(dupes) + "]"
+    # if variant
+    elif len(c_style) > 0:
+        card_name = card_name + " [" + c_style + "]"
+    # if coll_num variant
+    elif len(coll_variant) > 0:
+        card_name = card_name + " [" + coll_variant + "]"
+    # if normal card
+    else:
+        card_name = card_name
+    return card_name
+
+# Same function as build_filename but for handling card faces.
+def build_filename_faces(card,dupes,face):
+    if "flavor_name" in card and not card["reprint"]:
+        card_name = fix_characters(card["card_faces"][face]["flavor_name"])
+    else:
+        card_name = fix_characters(card["card_faces"][face]["name"])
+    c_style = card_style(card)
+    coll_variant = collector_num_variant(card)
+    if dupes > 0 and len(c_style) > 0 and len(coll_variant) > 0:
+        card_name = card_name + " [" + c_style + " " + coll_variant + " " + str(dupes) + "]"
+    elif dupes > 0 and len(c_style) > 0:
+        card_name = card_name + " [" + c_style + " " + str(dupes) + "]"
+    elif dupes > 0 and len(coll_variant) > 0:
+        card_name = card_name + " [" + c_style + "" + str(coll_variant) + "]"
+    elif len(c_style) > 0 and len(coll_variant) > 0:
+        card_name = card_name + " [" + c_style + "" + coll_variant + "]"
+    elif dupes > 0:
+        card_name = card_name + " [" + str(dupes) + "]"
+    elif len(c_style) > 0:
+        card_name = card_name + " [" + c_style + "]"
+    elif len(coll_variant) > 0:
+        card_name = card_name + " [" + coll_variant + "]"
+    else:
+        card_name = card_name
+    return card_name
+
+def build_filename_reversible(card,dupes,face):
+    card_name = fix_characters(card["card_faces"][face]["name"])
+    c_style = card_style(card)
+    if face == 0:
+        f_name = 'a'
+    else:
+        f_name = 'b'
+    if len(c_style) > 0:
+        card_name = card_name + " [" + c_style + f_name + "]"
+    else:
+        card_name = card_name + " [" + f_name + "]"
+    return card_name
+
+# Fighting the urge to call this function some variation of Harvey Dent.
+def two_face(card):
+    match card["layout"]:
+        case "transform" | "modal_dfc" | "reversible_card" | "art_series":
+            return True
+        case _:
+            return False
+
+# Returns the file_name that was downloaded to controller which sends it to GUI
 def boot_download(card,card_list,path,set_name,size,get_digital):
     dupes = find_dupes(card,card_list)
     download_path = get_lang_path(path,card)
     file_name = download_image(card,dupes,download_path,size,get_digital)
     return file_name
-            
-def get_image_size(size):
-    if "small" in size:
-        return "small"
-    elif "normal" in size:
-        return "normal"
-    elif "large" in size:
-        return "large"
-    elif "png" in size:
-        return "png"
-    elif "art_crop" in size:
-        return "art_crop"
-    elif "border_crop" in size:
-        return "border_crop"
 
 def get_lang_path(path,card):
     card_lang = fix_lang(card["lang"])

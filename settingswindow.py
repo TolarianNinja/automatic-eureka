@@ -24,6 +24,7 @@ class SettingsWindow(Toplevel):
         self.frame_size.save_info()
         self.frame_filters.save_info()
         self.frame_other.save_info()
+        self.controller.update_filtered_sets()
         self.destroy()
 
     def reset_defaults(self):
@@ -93,10 +94,10 @@ class SettingsFrameFilters(LabelFrame):
         self.controller = controller
         filter_names = [ "Core Sets", "Expansions", "Draft Innovation", "Commander",
                          "Masters", "Arsenal", "From the Vault", "Spellbook",
-                         "Premium Deck Series", "Duel Decks", "Starter", "Box",
-                         "Planechase", "Archenemy", "Vanguard", "Funny",
-                         "Promo", "Token", "Memorabilia", "Minigame",
-                         "Alchemy", "Treasure Chest" ]
+                         "Premium Deck Series", "Starter", "Box", "Masterpiece",
+                         "Duel Decks", "Planechase", "Archenemy", "Vanguard", 
+                         "Funny", "Promo", "Token", "Memorabilia", 
+                         "Minigame", "Alchemy", "Treasure Chest" ]
         c_row = 0
         c_col = 0
         self.filter_buttons = [None] * len(filter_names)

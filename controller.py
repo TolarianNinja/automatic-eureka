@@ -11,21 +11,23 @@ import dloader, sets, scrython, time, os
 # file_names            The array of formatted filenames
 class Controller:
     def __init__(self):
+        # Currently offline.  This should get refactored anyway.
         self.set_list = sets.get_sets_full()
-        self.current_set = self.set_list[0]
-        self.current_set_name = self.current_set["name"]
-        self.current_set_code = self.current_set["code"]
-        self.current_set_size = self.current_set["card_count"]
+        #self.current_set = self.set_list[0]
+        #self.current_set_name = self.current_set["name"]
+        #self.current_set_code = self.current_set["code"]
+        #self.current_set_size = self.current_set["card_count"]
         self.card_list = [] 
         self.set_languages_nf = []
         self.set_languages_f = []
         self.download_path = "E:\Programming Projects\Python\Automatic-Eureka\Testing Dump\\"
-        #self.use_png = False
         self.include_digital = 0
         self.image_size = "large"
         self.set_type_filters = self.get_default_filters()
         self.rate_limit = 0.23
         self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters)
+        self.home_directory = os.getcwd()
+        self.hard_stop = False
 
     def __str__(self):
         return str(self.current_set["name"])
@@ -72,7 +74,7 @@ class Controller:
             set_code = set_code + " "
         return set_code
 
-    def get_sets_str(self):
+    def get_sets_all_str(self):
         set_strings = []
         for c_set in self.set_list:
             set_code = str(c_set["code"]).upper()
@@ -123,6 +125,8 @@ class Controller:
             self.current_set_name,
             self.image_size,
             self.include_digital)
+        if len(file_name) == 0:
+            print("Error downloading " + card["name"] + " | Set: " + card["set"])
         return file_name
 
     def get_lang_path(self,card,path):
@@ -155,7 +159,7 @@ class Controller:
         set_download_path(path)
         set_image_size(size)
         set_set_type_filters(filters)
-        set_get_digital(get_digital)
+        set_include_digital(get_digital)
         save_settings_file()
 
     def save_settings_file():
@@ -172,8 +176,8 @@ class Controller:
         default_path = os.getcwd() + "\\Downloads\\"
         size = "large"
         set_filters = [ 1, 1, 1, 1, 1, 1, 1, 1,
-                        1, 1, 1, 1, 0, 0, 0, 0,
-                        1, 0, 0, 0, 0, 0 ]
+                        1, 1, 1, 1, 1, 0, 0, 0,
+                        1, 0, 0, 0, 0, 0, 0 ]
         get_digital = 0
         settings.append(default_path)
         settings.append(size)
@@ -189,8 +193,30 @@ class Controller:
 
     def get_default_filters(self):
         return [ 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 0, 0, 0, 0,
-                1, 0, 0, 0, 0, 0 ]
+                1, 1, 1, 1, 1, 0, 0, 0,
+                1, 0, 0, 0, 0, 0, 0 ]
 
     def get_default_digital(self):
         return 0
+
+    def get_home_directory(self):
+        return self.home_directory
+
+    def go_home(self):
+        os.chdir(self.home_directory)
+
+    def get_page_count(self):
+        pages = int(self.get_set_size() / 175) + 1
+        return pages
+
+    def update_filtered_sets(self):
+        self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters)
+
+    def set_stop(self):
+        self.hard_stop = True
+
+    def unset_stop(self):
+        self.hard_stop = False
+
+    def is_stop(self):
+        return self.hard_stop
