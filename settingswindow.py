@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import filedialog
 import controller
 
+changes = False
+
 def donothing():
     return
 
@@ -12,7 +14,6 @@ class SettingsWindow(Toplevel):
         self.geometry('465x375')
         self.iconbitmap('images/settings_icon.ico')
         self.controller = master_controller
-
         self.frame_path = SettingsFramePath(self, self.controller)
         self.frame_size = SettingsFrameSize(self, self.controller)
         self.frame_filters = SettingsFrameFilters(self, self.controller)
@@ -20,11 +21,14 @@ class SettingsWindow(Toplevel):
         self.frame_close = SettingsFrameClose(self)
 
     def okay_save(self):
+        global changes
         self.frame_path.save_info()
         self.frame_size.save_info()
         self.frame_filters.save_info()
         self.frame_other.save_info()
         self.controller.update_filtered_sets()
+        if changes:
+            self.controller.save_settings_file()
         self.destroy()
 
     def reset_defaults(self):
@@ -32,6 +36,10 @@ class SettingsWindow(Toplevel):
         self.frame_size.set_default()
         self.frame_filters.set_default()
         self.frame_other.set_default()
+
+    def change_made(self,parent):
+        global changes
+        changes = True
 
 class SettingsFramePath(LabelFrame):
     def __init__(self, parent, controller):
@@ -44,6 +52,7 @@ class SettingsFramePath(LabelFrame):
         self.settings_download_path_string.set(self.controller.get_download_path())
         self.settings_download_path_entry = Entry(self.settings_frame_path, justify=LEFT, width=70, textvariable=self.settings_download_path_string)
         self.settings_download_path_entry.grid(row=0, column=0)
+        self.settings_download_path_entry.bind("<Button-1>", self.change_made)
     
         # Folder open for download path with icon
         self.settings_download_directory_image = PhotoImage(file = r"images/selectdir.png")
@@ -53,12 +62,17 @@ class SettingsFramePath(LabelFrame):
     def set_path_askdirectory(self):
         new_path = filedialog.askdirectory()
         self.settings_download_path_string.set(new_path)
+        change_made()
 
     def save_info(self):
         self.controller.set_download_path(self.settings_download_path_string.get())
 
     def set_default(self):
         self.settings_download_path_string.set(self.controller.get_default_path())
+
+    def change_made(self,parent):
+        global changes
+        changes = True
 
 class SettingsFrameSize(LabelFrame):
     def __init__(self, parent, controller):
@@ -80,6 +94,13 @@ class SettingsFrameSize(LabelFrame):
         self.settings_size_radio_png.grid(row=0, column=3, sticky=W)
         self.settings_size_radio_art_crop.grid(row=0, column=4, sticky=W)
         self.settings_size_radio_border_crop.grid(row=0, column=5, sticky=W)
+        self.settings_size_radio_small.bind("<Button-1>", self.change_made)
+        self.settings_size_radio_normal.bind("<Button-1>", self.change_made)
+        self.settings_size_radio_large.bind("<Button-1>", self.change_made)
+        self.settings_size_radio_png.bind("<Button-1>", self.change_made)
+        self.settings_size_radio_art_crop.bind("<Button-1>", self.change_made)
+        self.settings_size_radio_border_crop.bind("<Button-1>", self.change_made)
+        
         self.settings_size.set(controller.get_image_size())
 
     def save_info(self):
@@ -87,6 +108,10 @@ class SettingsFrameSize(LabelFrame):
 
     def set_default(self):
         self.settings_size.set(self.controller.get_default_size())
+
+    def change_made(self,parent):
+        global changes
+        changes = True
 
 class SettingsFrameFilters(LabelFrame):
     def __init__(self, parent, controller):
@@ -109,6 +134,7 @@ class SettingsFrameFilters(LabelFrame):
             self.filter_values[i].set(controller.get_set_type_filters()[i])
             self.filter_buttons[i] = Checkbutton(self.settings_frame_filters, text=filter_names[i], variable=self.filter_values[i])
             self.filter_buttons[i].grid(row=c_row, column=c_col, sticky=W)
+            self.filter_buttons[i].bind("<Button-1>", self.change_made)
             self.filter_buttons[i].update()
             c_col = c_col + 1
             if c_col >= 4:
@@ -126,6 +152,10 @@ class SettingsFrameFilters(LabelFrame):
         for i in range(0, len(default_filters)):
             self.filter_values[i].set(default_filters[i])
 
+    def change_made(self,parent):
+        global changes
+        changes = True
+
 class SettingsFrameOtherSettings(LabelFrame):
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -136,16 +166,23 @@ class SettingsFrameOtherSettings(LabelFrame):
         self.settings_frame_other_settings.grid(row=3, column=0, sticky=W)
         self.settings_get_digital_checkbox = Checkbutton(self.settings_frame_other_settings, text="Digital cards in paper sets", width=19, justify="left", variable=self.get_digital)
         self.settings_get_digital_checkbox.grid(row=0, column=0, sticky=W)
+        self.settings_get_digital_checkbox.bind("<Button-1>", self.change_made)
         self.settings_button_reset_default = Button(self.settings_frame_other_settings, text="Reset to defaults", command=parent.reset_defaults, width=19)
         self.settings_button_reset_default.grid(row=0, column=2, sticky=E)
-        self.settings_get_digital_checkbox = Button(self.settings_frame_other_settings, text="Settings Info", width=19)
-        self.settings_get_digital_checkbox.grid(row=0, column=1)
+        self.settings_button_reset_default.bind("<Button-1>", self.change_made)
+        self.settings_info = Button(self.settings_frame_other_settings, text="Settings Info", width=19)
+        self.settings_info.grid(row=0, column=1)
+        self.settings_info.bind("<Button-1>", self.change_made)
 
     def save_info(self):
         self.controller.set_include_digital(self.get_digital.get())
 
     def set_default(self):
         self.get_digital.set(self.controller.get_default_digital())
+
+    def change_made(self,parent):
+        global changes
+        changes = True
 
 class SettingsFrameClose(LabelFrame):
     def __init__(self, parent):

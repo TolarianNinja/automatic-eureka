@@ -42,8 +42,6 @@ class ControlFrame(LabelFrame):
     def set_selected(self,master):
         code_str = self.get_code_selected()
         self.controller.update_set(code_str)
-        #load_set_cards()
-        #tell parent to tell imageframe to load_set_cards()
         self.master.load_cards_command(code_str)
         self.controller.get_set_langs()
         set_info = "Current: " + self.controller.get_set_name() + " | " + code_str.upper()
@@ -64,3 +62,6 @@ class ControlFrame(LabelFrame):
             self.sets_box['values'] = sets_searched
         else:
             self.sets_box['values'] = self.controller.get_sets_filtered_str()
+
+    def refresh(self):
+        self.sets_box['values'] = self.controller.get_sets_filtered_str()

@@ -1,4 +1,4 @@
-import dloader, sets, scrython, time, os
+import dloader, sets, scrython, time, os, settingsfile
 
 # set_list              The list of sets
 # current_set           The current set (JSON) that is loaded
@@ -20,10 +20,12 @@ class Controller:
         self.card_list = [] 
         self.set_languages_nf = []
         self.set_languages_f = []
-        self.download_path = "E:\Programming Projects\Python\Automatic-Eureka\Testing Dump\\"
+        self.download_path = ""
+        #self.download_path = "E:\Programming Projects\Python\Automatic-Eureka\Testing Dump\\"
         self.include_digital = 0
         self.image_size = "large"
-        self.set_type_filters = self.get_default_filters()
+        self.set_type_filters = []
+        self.settings_file = settingsfile.SettingsFile(self)
         self.rate_limit = 0.23
         self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters)
         self.home_directory = os.getcwd()
@@ -162,8 +164,18 @@ class Controller:
         set_include_digital(get_digital)
         save_settings_file()
 
-    def save_settings_file():
-        return
+    def save_settings_file(self):
+        self.settings_file.save_settings(
+            [ self.download_path,
+            self.image_size,
+            self.set_type_filters,
+            self.include_digital ])
+
+    def load_settings(self, settings):
+        self.set_download_path(settings[0])
+        self.set_image_size(settings[1])
+        self.set_set_type_filters(settings[2])
+        self.set_include_digital(settings[3])
 
     def get_set_type_filters(self):
         return self.set_type_filters
