@@ -79,7 +79,7 @@ Scrython library by NandaScott
                         message=about_message)
 
     def open_help(self):
-        window = helpwindow.HelpWindow()
+        window = helpwindow.HelpWindow(self.controller.get_home_directory())
 
     def refresh(self):
         self.master.refresh()

@@ -53,6 +53,9 @@ class Controller:
     def get_current_set(self):
         return self.current_set
 
+    def get_set_digital(self):
+        return self.current_set["digital"]
+
     def get_set_name(self):
         return self.current_set_name
 

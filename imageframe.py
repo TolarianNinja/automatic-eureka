@@ -45,6 +45,9 @@ class ImageFrame(LabelFrame):
             messagebox.showinfo(title="Error",
                         message="There are no cards loaded.")
             return
+        if not self.controller.get_include_digital() and self.controller.get_current_set()["digital"]:
+            messagebox.showinfo(title="Error",
+                                message="Digital sets can't be downloaded when downloading digital cards is turned off.  Update your settings to download this set.")
         download_path = self.controller.build_folders()
         self.progress_bar['maximum'] = self.controller.get_set_size()
         for card in self.controller.get_card_list():

@@ -10,10 +10,10 @@ def donothing():
 class SettingsWindow(Toplevel):
     def __init__(self,parent,master_controller):
         Toplevel.__init__(self)
-        self.title('Settings')
-        self.geometry('465x375')
-        self.iconbitmap('images/settings.ico')
+        self.title("Settings")
+        self.geometry("465x375")
         self.controller = master_controller
+        self.iconbitmap(self.controller.get_home_directory() + "/images/settings.ico")
         self.frame_path = SettingsFramePath(self, self.controller)
         self.frame_size = SettingsFrameSize(self, self.controller)
         self.frame_filters = SettingsFrameFilters(self, self.controller)
@@ -57,7 +57,7 @@ class SettingsFramePath(LabelFrame):
         self.settings_download_path_entry.bind("<Button-1>", self.change_made)
     
         # Folder open for download path with icon
-        self.settings_download_directory_image = PhotoImage(file = r"images/selectdir.png")
+        self.settings_download_directory_image = PhotoImage(file = self.controller.get_home_directory() + "/images/selectdir.png")
         self.settings_download_directory_button = Button(self.settings_frame_path, command=self.set_path_askdirectory, image = self.settings_download_directory_image, width=16, height=16)
         self.settings_download_directory_button.grid(row=0, column=1)
 
@@ -183,7 +183,7 @@ class SettingsFrameOtherSettings(LabelFrame):
         changes = True
 
     def open_help(self):
-        window = helpwindow.HelpWindow()
+        window = helpwindow.HelpWindow(self.controller.get_home_directory())
 
 class SettingsFrameClose(LabelFrame):
     def __init__(self, parent):
