@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
-import controller
+import controller, helpwindow
 
 changes = False
 
@@ -170,7 +170,7 @@ class SettingsFrameOtherSettings(LabelFrame):
         self.settings_button_reset_default = Button(self.settings_frame_other_settings, text="Reset to defaults", command=parent.reset_defaults, width=19)
         self.settings_button_reset_default.grid(row=0, column=2, sticky=E)
         self.settings_button_reset_default.bind("<Button-1>", self.change_made)
-        self.settings_info = Button(self.settings_frame_other_settings, text="Settings Info", width=19)
+        self.settings_info = Button(self.settings_frame_other_settings, text="Settings Info", width=19, command=self.open_help)
         self.settings_info.grid(row=0, column=1)
         self.settings_info.bind("<Button-1>", self.change_made)
 
@@ -183,6 +183,9 @@ class SettingsFrameOtherSettings(LabelFrame):
     def change_made(self,parent):
         global changes
         changes = True
+
+    def open_help(self):
+        window = helpwindow.HelpWindow()
 
 class SettingsFrameClose(LabelFrame):
     def __init__(self, parent):

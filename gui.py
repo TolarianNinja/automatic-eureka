@@ -4,11 +4,11 @@ from tkinter import ttk
 from tkinter import font
 from PIL import ImageTk,Image
 import threading
-import sets, controller, settingswindow, controlframe, imageframe
+import sets, controller, settingswindow, controlframe, imageframe, helpwindow
 
 # Used for the stop button
 hard_stop = False
-splash_path = "images\\splash.png"
+#splash_path = "images\\splash.png"
 
 def donothing():
     return
@@ -54,7 +54,7 @@ class MenuBar(Menu):
         self.add_cascade(label="File", menu=self.menu_file)
         self.menu_help = Menu(self, tearoff=0)
         self.menu_help.add_command(label="About", command=self.window_about)
-        self.menu_help.add_command(label="Info", command=donothing)
+        self.menu_help.add_command(label="Info", command=self.open_help)
         self.add_cascade(label="Help", menu=self.menu_help)
 
     def open_settings(self):
@@ -71,6 +71,9 @@ Scrython library by NandaScott
 """
         messagebox.showinfo(title="About Scryfall Image Downloader",
                         message=about_message)
+
+    def open_help(self):
+        window = helpwindow.HelpWindow()
 
 root = MainWindow()
 root.mainloop()
