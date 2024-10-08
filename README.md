@@ -6,6 +6,11 @@ It is an updated (with GUI! and other things!) version of the Bag of Tricks file
 Download all source files, run gui.py
 
 Changelog:
+v0.7.2
+Bug fixes relating to settings file
+
+v0.7.1
+Settings information window
 
 v0.7
 Settings are stored in a file created at startup
