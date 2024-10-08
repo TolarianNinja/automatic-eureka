@@ -172,7 +172,7 @@ class Controller:
             self.include_digital ])
 
     def load_settings(self, settings):
-        self.set_download_path(settings[0])
+        self.set_download_path(settings[0].strip('\n'))
         self.set_image_size(settings[1])
         self.set_set_type_filters(settings[2])
         self.set_include_digital(settings[3])
@@ -185,7 +185,7 @@ class Controller:
 
     def get_defaults(self):
         settings = []
-        default_path = os.getcwd() + "\\Downloads\\"
+        default_path = os.getcwd() + "//Downloads//"
         size = "large"
         set_filters = [ 1, 1, 1, 1, 1, 1, 1, 1,
                         1, 1, 1, 1, 1, 0, 0, 0,

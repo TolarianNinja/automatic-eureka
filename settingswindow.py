@@ -12,7 +12,7 @@ class SettingsWindow(Toplevel):
         Toplevel.__init__(self)
         self.title('Settings')
         self.geometry('465x375')
-        self.iconbitmap('images/settings_icon.ico')
+        self.iconbitmap('images/settings.ico')
         self.controller = master_controller
         self.frame_path = SettingsFramePath(self, self.controller)
         self.frame_size = SettingsFrameSize(self, self.controller)
