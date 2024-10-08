@@ -8,7 +8,7 @@ def donothing():
     return
 
 class SettingsWindow(Toplevel):
-    def __init__(self,master_controller):
+    def __init__(self,parent,master_controller):
         Toplevel.__init__(self)
         self.title('Settings')
         self.geometry('465x375')
@@ -19,6 +19,7 @@ class SettingsWindow(Toplevel):
         self.frame_filters = SettingsFrameFilters(self, self.controller)
         self.frame_other = SettingsFrameOtherSettings(self, self.controller)
         self.frame_close = SettingsFrameClose(self)
+        self.parent = parent
 
     def okay_save(self):
         global changes
@@ -29,6 +30,7 @@ class SettingsWindow(Toplevel):
         self.controller.update_filtered_sets()
         if changes:
             self.controller.save_settings_file()
+            self.parent.refresh()
         self.destroy()
 
     def reset_defaults(self):
@@ -82,24 +84,20 @@ class SettingsFrameSize(LabelFrame):
         self.settings_frame_size = LabelFrame(parent, bd=2, text="Image Size", width=465, padx=5, pady=5)
         self.settings_frame_size.grid(row=1, column=0, sticky=W)
         self.settings_size = StringVar()
-        self.settings_size_radio_small = Radiobutton(self.settings_frame_size, text="Small", variable=self.settings_size, value="small", width=6)
-        self.settings_size_radio_normal = Radiobutton(self.settings_frame_size, text="Normal", variable=self.settings_size, value="normal", width=6)
-        self.settings_size_radio_large = Radiobutton(self.settings_frame_size, text="Large", variable=self.settings_size, value="large", width=6)
-        self.settings_size_radio_png = Radiobutton(self.settings_frame_size, text="PNG", variable=self.settings_size, value="png", width=6)
-        self.settings_size_radio_art_crop = Radiobutton(self.settings_frame_size, text="Art Crop", variable=self.settings_size, value="art_crop", width=7)
-        self.settings_size_radio_border_crop = Radiobutton(self.settings_frame_size, text="Border Crop", variable=self.settings_size, value="border_crop", width=9)
-        self.settings_size_radio_small.grid(row=0, column=0, sticky=W)
-        self.settings_size_radio_normal.grid(row=0, column=1, sticky=W)
-        self.settings_size_radio_large.grid(row=0, column=2, sticky=W)
-        self.settings_size_radio_png.grid(row=0, column=3, sticky=W)
-        self.settings_size_radio_art_crop.grid(row=0, column=4, sticky=W)
-        self.settings_size_radio_border_crop.grid(row=0, column=5, sticky=W)
-        self.settings_size_radio_small.bind("<Button-1>", self.change_made)
-        self.settings_size_radio_normal.bind("<Button-1>", self.change_made)
-        self.settings_size_radio_large.bind("<Button-1>", self.change_made)
-        self.settings_size_radio_png.bind("<Button-1>", self.change_made)
-        self.settings_size_radio_art_crop.bind("<Button-1>", self.change_made)
-        self.settings_size_radio_border_crop.bind("<Button-1>", self.change_made)
+        self.settings_size_radio = [None] * 6
+        size_text = [ "Small", "Normal", "Large", "PNG", "Art Crop", "Border Crop" ]
+        size_values = [ "small", "normal", "large", "png", "art_crop", "border_crop" ]
+        for num in range(0, 4):
+            self.settings_size_radio[num] = Radiobutton(self.settings_frame_size, text=size_text[num], variable=self.settings_size, value=size_values[num], width=6)
+            self.settings_size_radio[num].grid(row=0, column=num, sticky=W)
+            self.settings_size_radio[num].bind("<Button-1>", self.change_made)
+        # Last two need different widths
+        self.settings_size_radio[4] = Radiobutton(self.settings_frame_size, text=size_text[4], variable=self.settings_size, value=size_values[4], width=7)
+        self.settings_size_radio[5] = Radiobutton(self.settings_frame_size, text=size_text[5], variable=self.settings_size, value=size_values[5], width=9)
+        self.settings_size_radio[4].grid(row=0, column=4, sticky=W)
+        self.settings_size_radio[5].grid(row=0, column=5, sticky=W)
+        self.settings_size_radio[4].bind("<Button-1>", self.change_made)
+        self.settings_size_radio[5].bind("<Button-1>", self.change_made)
         
         self.settings_size.set(controller.get_image_size())
 

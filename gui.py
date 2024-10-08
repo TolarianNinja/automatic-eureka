@@ -26,6 +26,9 @@ class MainWindow(Tk):
         self.option_add("*TCombobox*Listbox*Font", self.set_search_font)
         self.main_frame.grid(row=0, column=0)
 
+    def refresh(self):
+        self.main_frame.refresh()
+
 class MainFrame(Frame):
     def __init__(self, parent, master_controller):
         super().__init__(parent, height=700, width=500, bd=2)
@@ -44,6 +47,9 @@ class MainFrame(Frame):
         t = threading.Thread(target=self.images.start_process)
         t.start()
 
+    def refresh(self):
+        self.controls.refresh()
+
 class MenuBar(Menu):
     def __init__(self, parent, master_controller):
         super().__init__(parent)
@@ -58,7 +64,7 @@ class MenuBar(Menu):
         self.add_cascade(label="Help", menu=self.menu_help)
 
     def open_settings(self):
-        window = settingswindow.SettingsWindow(self.controller)
+        window = settingswindow.SettingsWindow(self,self.controller)
 
     def window_about(self):
         about_message = """Automatic Eureka by Tolarian Ninja / Alex Hartshorn-Savage
@@ -74,6 +80,9 @@ Scrython library by NandaScott
 
     def open_help(self):
         window = helpwindow.HelpWindow()
+
+    def refresh(self):
+        self.master.refresh()
 
 root = MainWindow()
 root.mainloop()

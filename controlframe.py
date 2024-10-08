@@ -31,7 +31,7 @@ class ControlFrame(LabelFrame):
         self.sets_box.bind("<KeyRelease>", self.set_search)
 
     def button_click_settings(self):
-        window = settingswindow.SettingsWindow(self.controller)
+        window = settingswindow.SettingsWindow(self,self.controller)
 
     def button_click_stop(self):
         self.controller.set_stop()
