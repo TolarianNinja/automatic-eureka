@@ -301,7 +301,7 @@ def collector_num_variant(card):
             return card["collector_number"][-1]
 
 # Let's actually download the image!  This is slowly getting refactored to be less of a clusterfuck.
-def download_image(card,dupes,path,size,get_digital):
+def download_image(card,dupes,path,size,get_digital,name_check):
     if card["digital"]:
         if not get_digital:
             return
@@ -310,19 +310,10 @@ def download_image(card,dupes,path,size,get_digital):
     if two_face(card):
         file_names = []
         for i in range(0, 2):
-            """
-            if card["layout"] == "reversible card":
-                if i == 0:
-                    side = 'a'
-                else:
-                    side = 'b'
-                file_name = build_filename_faces(card,dupes,i) + "[" + side + "]"
-            else:
-            """
             if card["layout"] == "reversible_card":
                 file_name = build_filename_reversible(card,dupes,i)
             else:
-                file_name = build_filename_faces(card,dupes,i)
+                file_name = build_filename_faces(card,dupes,i,name_check)
             file_url = card["card_faces"][i]["image_uris"][size]
             file_name = file_name + '.' + get_ext(size)
             if not os.path.exists(file_name):
@@ -333,7 +324,7 @@ def download_image(card,dupes,path,size,get_digital):
             file_names.append(file_name)
         return file_names[0]
     else:
-        file_name = build_filename(card,dupes)
+        file_name = build_filename(card,dupes,name_check)
         file_url = card["image_uris"][size]
         file_name = file_name + '.' + get_ext(size)
         if not os.path.exists(file_name):
@@ -351,11 +342,13 @@ def get_ext(size):
         return "jpg"
 
 # Builds the filename and appropriately places brackets based on dupes of card styles
-def build_filename(card,dupes):
+def build_filename(card,dupes,name_check):
     if "flavor_name" in card and not card["reprint"]:
         card_name = fix_characters(card["flavor_name"])
     else:
         card_name = fix_characters(card["name"])
+    if not name_check:
+        return card_name
     c_style = card_style(card)
     coll_variant = collector_num_variant(card)
     # if variant + coll_num variant + dupe
@@ -386,11 +379,13 @@ def build_filename(card,dupes):
     return card_name
 
 # Same function as build_filename but for handling card faces.
-def build_filename_faces(card,dupes,face):
+def build_filename_faces(card,dupes,face,name_check):
     if "flavor_name" in card and not card["reprint"]:
         card_name = fix_characters(card["card_faces"][face]["flavor_name"])
     else:
         card_name = fix_characters(card["card_faces"][face]["name"])
+    if not name_check and not card["promo"]:
+        return card_name
     c_style = card_style(card)
     coll_variant = collector_num_variant(card)
     if dupes > 0 and len(c_style) > 0 and len(coll_variant) > 0:
@@ -436,8 +431,16 @@ def two_face(card):
 def boot_download(card,card_list,path,set_name,size,get_digital):
     dupes = find_dupes(card,card_list)
     download_path = get_lang_path(path,card)
-    file_name = download_image(card,dupes,download_path,size,get_digital)
+    n_check = name_check(card,card_list)
+    file_name = download_image(card,dupes,download_path,size,get_digital,n_check)
     return file_name
+
+def name_check(card,card_list):
+    for loop_card in card_list:
+        if card["name"] == loop_card["name"]:
+            if card["collector_number"] != loop_card["collector_number"]:
+                return True
+    return False
 
 def get_lang_path(path,card):
     card_lang = fix_lang(card["lang"])
@@ -447,6 +450,7 @@ def get_lang_path(path,card):
         download_path = path + card_lang + " FOIL\\"
     return download_path
 
+"""
 def download_set_images(card_set):
     path = build_folders(card_set)
     card_list = sets.get_set_cards(card_set["code"],False)
@@ -456,5 +460,5 @@ def download_set_images(card_set):
         dupes = find_dupes(card,card_list)
         downloaded_filename = download_image(card,dupes,download_path,"large",False)
         print("Downloaded: " + str(downloaded_filename))
-    print("Work complete.")
-    
+    print("Work complete.") 
+"""
