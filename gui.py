@@ -37,6 +37,7 @@ class MainFrame(Frame):
         self.images = imageframe.ImageFrame(self, self.controller)
         self.controls.grid(row=0, column=0)
         self.images.grid(row=1, column=0)
+        self.bind("<FocusIn>", self.refresh)
         
     # Called by ControlFrame to tell ImageFrame to load the set
     def load_cards_command(self,set_code):
@@ -47,7 +48,7 @@ class MainFrame(Frame):
         t = threading.Thread(target=self.images.start_process)
         t.start()
 
-    def refresh(self):
+    def refresh(self,p):
         self.controls.refresh()
 
 class MenuBar(Menu):
