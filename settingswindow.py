@@ -63,7 +63,7 @@ class SettingsFramePath(LabelFrame):
 
     def set_path_askdirectory(self):
         new_path = filedialog.askdirectory()
-        self.settings_download_path_string.set(new_path)
+        self.settings_download_path_string.set(new_path + "/")
         self.change_made(self)
 
     def save_info(self):

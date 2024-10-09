@@ -6,7 +6,7 @@ from PIL import ImageTk,Image
 import threading
 import sets, controller
 
-splash_path = "images\\splash.png"
+splash_path = "images/splash.png"
 hard_stop = False
 
 class ImageFrame(LabelFrame):
@@ -60,7 +60,11 @@ class ImageFrame(LabelFrame):
                     self.image_text_label.update()
                 else:
                     card_path = self.controller.get_lang_path(card,download_path) + card_name
-                    self.update_image(self.image_label,card_path,self.controller.get_image_size())
+                    try:
+                        self.update_image(self.image_label,card_path,self.controller.get_image_size())
+                        self.image_text_string.set("Downloaded " + card_name)
+                    except FileNotFoundError:
+                        self.image_text_string.set("Downloaded " + card_name)
                     self.image_text_string.set("Downloaded " + card_name)
                     self.image_text_label.update()
                 self.progress_bar.step(1.0)

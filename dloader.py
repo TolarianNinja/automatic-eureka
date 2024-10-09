@@ -323,6 +323,18 @@ def download_image(card,dupes,path,size,get_digital,name_check):
                     handler.close()
             file_names.append(file_name)
         return file_names[0]
+    elif meld_result(card):
+        file_names = []
+        for i in range(1, 3):
+            file_name = build_filename_meldresult(card,i)
+            file_url = card["image_uris"][size]
+            file_name = file_name + '.' + get_ext(size)
+            if not os.path.exists(file_name):
+                image_data = requests.get(file_url).content
+                with open(file_name, 'wb') as handler:
+                    handler.write(image_data)
+                    handler.close()
+        return file_name[0]
     else:
         file_name = build_filename(card,dupes,name_check)
         file_url = card["image_uris"][size]
@@ -340,6 +352,14 @@ def get_ext(size):
         return "png"
     else:
         return "jpg"
+
+def meld_result(card):
+    if "meld" in card["layout"]:
+        for part in card["all_parts"]:
+            if part["component"] == "meld_result":
+                if card["name"] == part["name"]:
+                    return True
+    return False
 
 # Builds the filename and appropriately places brackets based on dupes of card styles
 def build_filename(card,dupes,name_check):
@@ -417,6 +437,14 @@ def build_filename_reversible(card,dupes,face):
         card_name = card_name + " [" + c_style + f_name + "]"
     else:
         card_name = card_name + " [" + f_name + "]"
+    return card_name
+
+def build_filename_meldresult(card,num):
+    if "flavor_name" in card and not card["reprint"]:
+        card_name = fix_characters(card["flavor_name"])
+    else:
+        card_name = fix_characters(card["name"])
+    card_name = card_name + " [" + str(num) + "]"
     return card_name
 
 # Fighting the urge to call this function some variation of Harvey Dent.
