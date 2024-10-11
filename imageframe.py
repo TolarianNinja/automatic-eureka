@@ -9,6 +9,7 @@ import sets, controller
 
 splash_path = "images/splash.png"
 hard_stop = False
+running = False
 
 class ImageFrame(LabelFrame):
     def __init__(self, parent, master_controller):
@@ -43,7 +44,12 @@ class ImageFrame(LabelFrame):
 
     def start_process(self):
         global hard_stop
+        global running
         card_name = ""
+        if self.controller.get_running():
+            messagebox.showinfo(title="Error",
+                        message="There is currently a set downloading.")
+            return
         self.progress_bar['value'] = 0
         if len(self.controller.get_card_list()) == 0:
             messagebox.showinfo(title="Error",
@@ -54,6 +60,7 @@ class ImageFrame(LabelFrame):
                                 message="Digital sets can't be downloaded when downloading digital cards is turned off.  Update your settings to download this set.")
         download_path = self.controller.build_folders()
         self.progress_bar['maximum'] = self.controller.get_set_size()
+        self.controller.set_running()
         for card in self.controller.get_card_list():
             if not self.controller.is_stop():
                 if card["digital"] and self.controller.get_include_digital() == 0:
@@ -81,6 +88,7 @@ class ImageFrame(LabelFrame):
             self.controller.unset_stop()
         else:
             complete_text = "Download of " + self.controller.get_set_name() + " completed successfully."
+        self.controller.unset_running()
         self.progress_bar['value'] = 0
         self.image_text_string.set(complete_text)
         self.controller.go_home()

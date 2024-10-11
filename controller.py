@@ -30,6 +30,7 @@ class Controller:
         self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters,self.include_digital)
         self.home_directory = os.getcwd()
         self.hard_stop = False
+        self.running = False
 
     def __str__(self):
         return str(self.current_set["name"])
@@ -239,6 +240,15 @@ class Controller:
 
     def is_stop(self):
         return self.hard_stop
+
+    def set_running(self):
+        self.running = True
+        
+    def unset_running(self):
+        self.running = False
+
+    def get_running(self):
+        return self.running
 
     def ma_set_type(self):
         match self.current_set["set_type"]:

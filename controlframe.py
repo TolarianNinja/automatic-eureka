@@ -6,6 +6,8 @@ from PIL import ImageTk,Image
 import threading
 import controller, settingswindow
 
+running = False
+
 class ControlFrame(LabelFrame):
     def __init__(self, parent, master_controller):
         super().__init__(parent, width=450, height=40, bd=2, text="Set Information")
@@ -22,7 +24,7 @@ class ControlFrame(LabelFrame):
         self.settings_image = PhotoImage(file = r"images/settings.png")
         self.settings_button = Button(self, command=self.button_click_settings, image = self.settings_image, width=36, height=36)
         self.sets_box.grid(sticky="W", row=0, column=0)
-        self.sets_box['values'] = self.controller.get_sets_all_str()
+        self.sets_box['values'] = self.controller.get_sets_filtered_str()
         self.set_info_label.grid(sticky="W", row=1, column=0)
         self.start_button.grid(row=0, column=1, rowspan=2, sticky="W")
         self.stop_button.grid(row=0, column=2, rowspan=2, sticky="W")
@@ -40,12 +42,19 @@ class ControlFrame(LabelFrame):
         self.master.get_images_command()
 
     def set_selected(self,master):
+        global running
+        if self.controller.get_running():
+            messagebox.showinfo(title="Error",
+                        message="There is currently a set loading.")
+            return
+        self.controller.set_running()
         code_str = self.get_code_selected()
         self.controller.update_set(code_str)
         self.master.load_cards_command(code_str)
         self.controller.get_set_langs()
         set_info = "Current: " + self.controller.get_set_name() + " | " + code_str.upper()
         self.set_info_text.set(set_info)
+        self.controller.unset_running()
 
     def get_code_selected(self):
         selected = self.sets_box.get()
