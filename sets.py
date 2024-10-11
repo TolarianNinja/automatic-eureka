@@ -57,10 +57,12 @@ def get_sets_full():
 
 # Filters the full list of sets to remove anything that is not a printed (paper)
 # set of legal cards (ie: no tokens, oversized, inserts, etc)
-def get_sets_filtered(set_list_full,filters):
+def get_sets_filtered(set_list_full,filters,inc_digital):
     set_list_filtered = []
     set_types = []
     for c_set in set_list_full:
+        if c_set["digital"] and not inc_digital:
+            continue
         match c_set["set_type"]:
             case "core":
                 if filters[0] == 1:

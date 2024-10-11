@@ -27,7 +27,7 @@ class Controller:
         self.set_type_filters = []
         self.settings_file = settingsfile.SettingsFile(self)
         self.rate_limit = 0.23
-        self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters)
+        self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters,self.include_digital)
         self.home_directory = os.getcwd()
         self.hard_stop = False
 
@@ -106,8 +106,9 @@ class Controller:
         return set_strings
 
     def build_folders(self):
+        #print(self.download_path + self.ma_set_type())
         main_path = dloader.build_folders(
-            self.download_path,
+            self.download_path + self.ma_set_type(),
             self.current_set_name,
             self.set_languages_nf,
             self.set_languages_f)
@@ -188,7 +189,7 @@ class Controller:
 
     def get_defaults(self):
         settings = []
-        default_path = os.getcwd() + "//Downloads//"
+        default_path = os.getcwd() + "\\Downloads\\"
         size = "large"
         set_filters = [ 1, 1, 1, 1, 1, 1, 1, 1,
                         1, 1, 1, 1, 1, 0, 0, 0,
@@ -221,11 +222,14 @@ class Controller:
         os.chdir(self.home_directory)
 
     def get_page_count(self):
-        pages = int(self.get_set_size() / 175) + 1
+        if self.get_set_size() % 175 == 0:
+            pages = int(self.get_set_size() / 175)
+        else:
+            pages = int(self.get_set_size() / 175) + 1
         return pages
 
     def update_filtered_sets(self):
-        self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters)
+        self.set_list_filtered = sets.get_sets_filtered(self.set_list,self.set_type_filters,self.include_digital)
 
     def set_stop(self):
         self.hard_stop = True
@@ -235,3 +239,16 @@ class Controller:
 
     def is_stop(self):
         return self.hard_stop
+
+    def ma_set_type(self):
+        match self.current_set["set_type"]:
+            case "core":
+                return "Core Sets\\"
+            case "expansion":
+                return "Expansions\\"
+            case "promo":
+                return "Promo Cards\\"
+            case "token":
+                return "Tokens\\"
+            case _:
+                return "Special Sets\\"

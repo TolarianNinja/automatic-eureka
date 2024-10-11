@@ -6,8 +6,9 @@ image_path = "E:\\Programming Projects\\Python\\Automatic-Eureka\\Testing Dump\\
 def card_style(card):
     card_style = ""
     variant_foil = False
+    numbered = [ "Nazgul", "Elesh Norn, Mother of Machines" ]
     # Secret Lair has version checked with collector number, same with some specific cards
-    if "sld" in card["set"] or fix_characters(card["name"]) == "Nazgul":
+    if "sld" in card["set"] or fix_characters(card["name"]) in numbered:
         return str(col_num_prefix(card))
     if card["promo"]:
         if len(card_style := is_set_promo(card)) > 0:
@@ -53,17 +54,28 @@ def is_variant(card,variant_foil,card_style):
     version = ""
     # everything special == nothing is
     if card["set_type"] == "masterpiece":
+        if card["set"] == "brr":
+            print("Card: " + card["name"] + " Num: " + str(card["collector_number"]))
+            if int(remove_non_num(card["collector_number"])) > 63:
+                return "Schematic"
+        elif card["set"] != "mul":
+            return card_style
+    if "basic" in card["type_line"].lower():
         return card_style
     if "extendedart" in card["frame_effects"]:
         version = "Ext Art"
+    elif "etched" in card["frame_effects"]:
+        version = "Etched"
+    elif "shatteredglass" in card["frame_effects"]:
+        version = "Shattered"
     elif "showcase" in card["frame_effects"]:
         # Checking specifically for the ring showcase cards from ltr
         if card["set"] == "ltr" and "promo_types" in card and "scroll" not in card["promo_types"]:
             version = "Ring"
+        elif card["set"] == "mh2":
+            version = "Sketch"
         else:
             version = "Showcase"
-    elif "etched" in card["frame_effects"]:
-        version = "Etched"
     if variant_foil:
         # More ltr specific fixes
         if card["set"] == "ltr":
@@ -133,8 +145,16 @@ def is_set_foil(card):
         card_style = "Rainbow"
     elif "raisedfoil" in card["promo_types"]:
         card_style = "Raised"
+    elif "neonink" in card["promo_types"]:
+        card_style = "Neon"
+    elif "doublerainbow" in card["promo_types"]:
+        card_style = "Rainbow"
+    elif "serialized" in card["promo_types"]:
+        card_style = "Serialized"
     elif "portrait" in card["promo_types"]:
         card_style = "Profile"
+    elif "finishes" in card and "etched" in card["finishes"]:
+        card_style = "Etched"
     elif "1997" in card["frame"] and "boosterfun" in card["promo_types"]:
         card_style = "Retro"
     else:
@@ -147,7 +167,7 @@ def col_num_prefix(card):
     except ValueError:
         return card["collector_number"]
     if col_num >= 100:
-        return col_num
+        output = col_num
     elif col_num < 10:
         output = "00" + str(col_num)
     elif col_num < 100:
@@ -164,6 +184,8 @@ def fix_characters(card_name):
         current_file = str(current_file).replace(" // ", "_")
     if "\"" in current_file:
         current_file = str(current_file).replace("\"", "")
+    if "/" in current_file:
+        current_file = str(current_file).replace("/", "")
     if ":" in current_file:
         current_file = str(current_file).replace(":", "")
     if "?" in current_file:
@@ -174,7 +196,7 @@ def fix_characters(card_name):
         return current_file
     elif "_____ _____" in current_file:
         current_file = str(current_file).replace("_____", "______")
-    elif "_____" in current_file:
+    elif "_____" in current_file and card_name != "_____": # Exception for Unhinged card _____
         current_file = str(current_file).replace("_____", "________")
     return current_file
 
@@ -182,6 +204,16 @@ def fix_set_name(name):
     set_name = name
     if ":" in set_name:
         set_name = str(name).replace(":", " -")
+    if "/" in set_name:
+        set_name = str(set_name).replace("/", "-")
+    if " Promos" in set_name:
+        set_name = str(set_name).replace(" Promos", "")
+    if " Promo" in set_name:
+        set_name = str(set_name).replace(" Promo", "")
+    if " Token" in set_name:
+        set_name = str(set_name).replace(" Token", "")
+    if " Tokens" in set_name:
+        set_name = str(set_name).replace(" Tokens", "")
     return set_name
 
 def build_folders(path,set_name,langs_nf,langs_f):
@@ -294,7 +326,7 @@ def collector_num_variant(card):
         coll_num = int(card["collector_number"])
         return ""
     except ValueError:
-        # planeswalker stamp, date stamp, serialized, foil
+        # planeswalker stamp, date stamp, serialized, foil, list
         if card["collector_number"][-1] in "psz★":
             return ""
         else:
@@ -306,7 +338,11 @@ def download_image(card,dupes,path,size,get_digital,name_check):
         if not get_digital:
             return
     dupe_string = ""
-    os.chdir(path)
+    try:
+        os.chdir(path)
+    except FileNotFoundError:
+        os.makedirs(path,511,True)
+        os.chdir(path)
     if two_face(card):
         file_names = []
         for i in range(0, 2):
@@ -363,7 +399,7 @@ def meld_result(card):
 
 # Builds the filename and appropriately places brackets based on dupes of card styles
 def build_filename(card,dupes,name_check):
-    if "flavor_name" in card and not card["reprint"]:
+    if "flavor_name" in card and card["set"] == "sld":
         card_name = fix_characters(card["flavor_name"])
     else:
         card_name = fix_characters(card["name"])
@@ -372,19 +408,30 @@ def build_filename(card,dupes,name_check):
     c_style = card_style(card)
     coll_variant = collector_num_variant(card)
     # if variant + coll_num variant + dupe
-    if dupes > 0 and len(c_style) > 0 and len(coll_variant) > 0:
+    if dupes > 1 and len(c_style) > 0 and len(coll_variant) > 0:
         card_name = card_name + " [" + c_style + " " + coll_variant + " " + str(dupes) + "]"
-    # if variant + dupe
-    elif dupes > 0 and len(c_style) > 0:
+    elif dupes > 1 and len(c_style) > 0:
         card_name = card_name + " [" + c_style + " " + str(dupes) + "]"
-    # if variant + coll_num variant
-    elif len(c_style) > 0 and len(coll_variant) > 0:
-        card_name = card_name + " [" + c_style + "" + coll_variant + "]"
-        print("Card Name: " + card["name"] + " Card Number: \"" + str(card["collector_number"]) + "\"")
-    # if dupe + coll_num variant
-    elif dupes > 0 and len(coll_variant) > 0:
-        card_name = card_name + " [" + coll_variant + " " + dupes + "]"
-    # if dupe
+    elif dupes == 1 and len(c_style) > 0 and len(coll_variant) > 0:
+        card_name = card_name + " [" + c_style + " " + coll_variant + "]"
+    elif dupes == 1 and len(coll_variant) > 0:
+        variant_sets = ["arn", "atq", "fem", "all", "chr", "hml" ]
+        if card["set"].lower() in variant_sets:
+            var_num = 0
+            if coll_variant == 'a':
+                var_num = 1
+            elif coll_variant == 'b':
+                var_num = 2
+            elif coll_variant == 'c':
+                var_num = 3
+            elif coll_variant == 'd':
+                var_num = 4
+            card_name = card_name + " [" + str(var_num) + "]"
+        else:
+            card_name = card_name + " [" + coll_variant + "]"
+    elif dupes > 1 and len(coll_variant) > 0:
+        print("dupes > 1 and len(coll_variant) > 0")
+        card_name = card_name + " [" + c_style + "" + str(coll_variant) + "]"
     elif dupes > 0:
         card_name = card_name + " [" + str(dupes) + "]"
     # if variant
@@ -408,13 +455,33 @@ def build_filename_faces(card,dupes,face,name_check):
         return card_name
     c_style = card_style(card)
     coll_variant = collector_num_variant(card)
-    if dupes > 0 and len(c_style) > 0 and len(coll_variant) > 0:
+    if dupes > 1 and len(c_style) > 0 and len(coll_variant) > 0:
         card_name = card_name + " [" + c_style + " " + coll_variant + " " + str(dupes) + "]"
-    elif dupes > 0 and len(c_style) > 0:
+        print("Dupes > 1 len(cstyle) > 0 and len(coll_variant) > 0")
+    elif dupes > 1 and len(c_style) > 0:
         card_name = card_name + " [" + c_style + " " + str(dupes) + "]"
-    elif dupes > 0 and len(coll_variant) > 0:
+        print("dupes > 1 and len(c_style) > 0")
+    elif dupes == 1 and len(coll_variant) > 0:
+        print("dupes == 1 and len(coll_variant) > 0")
+        variant_sets = ["arn", "atq", "fem", "all", "chr", "hml" ]
+        if card["set"].lower() in variant_sets:
+            var_num = 0
+            if coll_variant == 'a':
+                var_num = 1
+            elif coll_variant == 'b':
+                var_num = 2
+            elif coll_variant == 'c':
+                var_num = 3
+            elif coll_variant == 'd':
+                var_num = 4
+            card_name = card_name + " [" + str(var_num) + "]"
+        else:
+            card_name = card_name + " [" + coll_variant + "]"
+    elif dupes > 1 and len(coll_variant) > 0:
+        print("dupes > 1 and len(coll_variant) > 0")
         card_name = card_name + " [" + c_style + "" + str(coll_variant) + "]"
     elif len(c_style) > 0 and len(coll_variant) > 0:
+        print("len(c_style) > 0 and len(coll_variant) > 0")
         card_name = card_name + " [" + c_style + "" + coll_variant + "]"
     elif dupes > 0:
         card_name = card_name + " [" + str(dupes) + "]"
@@ -464,6 +531,8 @@ def boot_download(card,card_list,path,set_name,size,get_digital):
     return file_name
 
 def name_check(card,card_list):
+    if card["set"] == "sld":
+        return True
     for loop_card in card_list:
         if card["name"] == loop_card["name"]:
             if card["collector_number"] != loop_card["collector_number"]:
@@ -472,21 +541,12 @@ def name_check(card,card_list):
 
 def get_lang_path(path,card):
     card_lang = fix_lang(card["lang"])
+    if "token" in card["layout"]:
+        card_lang = card_lang + " TOK"
     if card["nonfoil"]:
         download_path = path + card_lang + "\\"
     else:
         download_path = path + card_lang + " FOIL\\"
     return download_path
 
-"""
-def download_set_images(card_set):
-    path = build_folders(card_set)
-    card_list = sets.get_set_cards(card_set["code"],False)
-    for card in card_list:
-        time.sleep(0.23)            # Rate limit
-        download_path = get_lang_path(path,card)
-        dupes = find_dupes(card,card_list)
-        downloaded_filename = download_image(card,dupes,download_path,"large",False)
-        print("Downloaded: " + str(downloaded_filename))
-    print("Work complete.") 
-"""
+

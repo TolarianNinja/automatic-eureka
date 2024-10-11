@@ -2,7 +2,8 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter import font
-from PIL import ImageTk,Image
+from PIL import ImageTk,Image,UnidentifiedImageError
+from scrython import ScryfallError
 import threading
 import sets, controller
 
@@ -28,7 +29,10 @@ class ImageFrame(LabelFrame):
         self.progress_bar['maximum'] = self.controller.get_page_count()
         self.image_text_string.set("Loading cards from " + self.controller.get_set_name())
         while len(self.controller.get_card_list()) < self.controller.get_set_size():
-            self.controller.get_set_cards(set_code,page)
+            try:
+                self.controller.get_set_cards(set_code,page)
+            except ScryfallError:
+                pass
             self.progress_bar.step(1)
             self.progress_bar.update()
             if (page * 175) < self.controller.get_set_size():
@@ -64,6 +68,8 @@ class ImageFrame(LabelFrame):
                         self.update_image(self.image_label,card_path,self.controller.get_image_size())
                         self.image_text_string.set("Downloaded " + card_name)
                     except FileNotFoundError:
+                        self.image_text_string.set("Downloaded " + card_name)
+                    except UnidentifiedImageError:
                         self.image_text_string.set("Downloaded " + card_name)
                     self.image_text_string.set("Downloaded " + card_name)
                     self.image_text_label.update()

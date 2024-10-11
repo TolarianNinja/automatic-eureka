@@ -22,7 +22,7 @@ class ControlFrame(LabelFrame):
         self.settings_image = PhotoImage(file = r"images/settings.png")
         self.settings_button = Button(self, command=self.button_click_settings, image = self.settings_image, width=36, height=36)
         self.sets_box.grid(sticky="W", row=0, column=0)
-        self.sets_box['values'] = self.controller.get_sets_filtered_str()
+        self.sets_box['values'] = self.controller.get_sets_all_str()
         self.set_info_label.grid(sticky="W", row=1, column=0)
         self.start_button.grid(row=0, column=1, rowspan=2, sticky="W")
         self.stop_button.grid(row=0, column=2, rowspan=2, sticky="W")
