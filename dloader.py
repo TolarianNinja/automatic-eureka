@@ -31,8 +31,10 @@ def card_style(card):
 def is_borderless(card,variant_foil,card_style):
     version = ""
     # Masterpiece sets will all have the same fancy format (everything special == nothing is)
+    except_sets = [ "wot" ]
     if card["set_type"] == "masterpiece":
-        return card_style
+        if card["set"].lower() not in except_sets:
+            return card_style
     if "art_series" in card["layout"]:
         return card_style
     if "borderless" in card["border_color"]:
@@ -52,13 +54,13 @@ def is_borderless(card,variant_foil,card_style):
                
 def is_variant(card,variant_foil,card_style):
     version = ""
-    # everything special == nothing is
+    # everything special == nothing is, except these
+    except_sets = [ "mul", "bot" ]
     if card["set_type"] == "masterpiece":
         if card["set"] == "brr":
-            print("Card: " + card["name"] + " Num: " + str(card["collector_number"]))
             if int(remove_non_num(card["collector_number"])) > 63:
                 return "Schematic"
-        elif card["set"] != "mul":
+        elif card["set"].lower() not in except_sets:
             return card_style
     if "basic" in card["type_line"].lower():
         return card_style
@@ -82,11 +84,11 @@ def is_variant(card,variant_foil,card_style):
             return card_style
     if len(version) > 0:
         if variant_foil:
-            # Magic Album has these backwards for Unfinity
-            if card["set"] == "unf":
-                return version + " " + card_style
-            else:
+            # Magic Album has these backwards for Doctor Who and LotR
+            if card["set"] == "who" or card["set"] == "ltr":
                 return card_style + " " + version
+            else:
+                return version + " " + card_style
         else:
             return version
     else:
@@ -155,8 +157,9 @@ def is_set_foil(card):
         card_style = "Profile"
     elif "finishes" in card and "etched" in card["finishes"]:
         card_style = "Etched"
-    elif "1997" in card["frame"] and "boosterfun" in card["promo_types"]:
-        card_style = "Retro"
+    elif "1997" in card["frame"]:
+        if "boosterfun" in card["promo_types"] or "masters" in card["set_type"]:
+            card_style = "Retro"
     else:
         card_style = ""
     return card_style
@@ -166,7 +169,9 @@ def col_num_prefix(card):
         col_num = int(card["collector_number"])
     except ValueError:
         return card["collector_number"]
-    if col_num >= 100:
+    if card["set"] == "ltr":    # Nazgul Fix
+        output = "0" + str(col_num)
+    elif col_num >= 100:
         output = col_num
     elif col_num < 10:
         output = "00" + str(col_num)
@@ -210,10 +215,22 @@ def fix_set_name(name):
         set_name = str(set_name).replace(" Promos", "")
     if " Promo" in set_name:
         set_name = str(set_name).replace(" Promo", "")
-    if " Token" in set_name:
-        set_name = str(set_name).replace(" Token", "")
     if " Tokens" in set_name:
         set_name = str(set_name).replace(" Tokens", "")
+    if " Token" in set_name:
+        set_name = str(set_name).replace(" Token", "")
+    if " Planes" in set_name:
+        set_name = str(set_name).replace(" Planes", "")
+    if " Schemes" in set_name:
+        set_name = str(set_name).replace(" Schemes", "")
+        """
+    try:
+        if set_name != "Double Masters 2022" and "core" not in set_name.lower():
+            year = int(set_name[-4:])
+            set_name = set_name[:-5]
+    except ValueError:
+        pass
+        """
     return set_name
 
 def build_folders(path,set_name,langs_nf,langs_f):
@@ -248,7 +265,9 @@ def find_dupes(card,card_list):
                 card_num = remove_non_num(card["collector_number"])
                 loop_num = remove_non_num(loop_card["collector_number"])
                 dup_found = True
-                if card_num > loop_num:
+                if card_num == loop_num:
+                    card_count = card_count + 1
+                elif card_num > loop_num:
                     card_count = card_count + 1
     if dup_found:
         return card_count
@@ -260,6 +279,8 @@ def find_dupes(card,card_list):
 def is_dupe(card,loop_card):
     if card["collector_number"] != loop_card["collector_number"]:
         if card["nonfoil"] == loop_card["nonfoil"]:
+            if "basic" in card["type_line"].lower():
+                return True
             if card["foil"] == loop_card["foil"]:
                 if card["lang"] == loop_card["lang"]:
                     return True
@@ -350,7 +371,10 @@ def download_image(card,dupes,path,size,get_digital,name_check):
                 file_name = build_filename_reversible(card,dupes,i)
             else:
                 file_name = build_filename_faces(card,dupes,i,name_check)
-            file_url = card["card_faces"][i]["image_uris"][size]
+            try:
+                file_url = card["card_faces"][i]["image_uris"][size]
+            except KeyError:
+                return ""
             file_name = file_name + '.' + get_ext(size)
             if not os.path.exists(file_name):
                 image_data = requests.get(file_url).content
@@ -363,7 +387,10 @@ def download_image(card,dupes,path,size,get_digital,name_check):
         file_names = []
         for i in range(1, 3):
             file_name = build_filename_meldresult(card,i)
-            file_url = card["image_uris"][size]
+            try:
+                file_url = card["image_uris"][size]
+            except KeyError:
+                return ""
             file_name = file_name + '.' + get_ext(size)
             if not os.path.exists(file_name):
                 image_data = requests.get(file_url).content
@@ -373,7 +400,10 @@ def download_image(card,dupes,path,size,get_digital,name_check):
         return file_name[0]
     else:
         file_name = build_filename(card,dupes,name_check)
-        file_url = card["image_uris"][size]
+        try:
+            file_url = card["image_uris"][size]
+        except KeyError:
+            return ""
         file_name = file_name + '.' + get_ext(size)
         if not os.path.exists(file_name):
             image_data = requests.get(file_url).content
@@ -403,8 +433,10 @@ def build_filename(card,dupes,name_check):
         card_name = fix_characters(card["flavor_name"])
     else:
         card_name = fix_characters(card["name"])
+        """
     if not name_check:
         return card_name
+        """
     c_style = card_style(card)
     coll_variant = collector_num_variant(card)
     # if variant + coll_num variant + dupe
@@ -430,8 +462,10 @@ def build_filename(card,dupes,name_check):
         else:
             card_name = card_name + " [" + coll_variant + "]"
     elif dupes > 1 and len(coll_variant) > 0:
-        print("dupes > 1 and len(coll_variant) > 0")
-        card_name = card_name + " [" + c_style + "" + str(coll_variant) + "]"
+        if "basic" in card["type_line"].lower():
+            card_name = card_name + " [" + str(dupes) + "]"
+        else:
+            card_name = card_name + " [" + str(dupes) + "" + str(coll_variant) + "]"
     elif dupes > 0:
         card_name = card_name + " [" + str(dupes) + "]"
     # if variant
@@ -457,12 +491,9 @@ def build_filename_faces(card,dupes,face,name_check):
     coll_variant = collector_num_variant(card)
     if dupes > 1 and len(c_style) > 0 and len(coll_variant) > 0:
         card_name = card_name + " [" + c_style + " " + coll_variant + " " + str(dupes) + "]"
-        print("Dupes > 1 len(cstyle) > 0 and len(coll_variant) > 0")
     elif dupes > 1 and len(c_style) > 0:
         card_name = card_name + " [" + c_style + " " + str(dupes) + "]"
-        print("dupes > 1 and len(c_style) > 0")
     elif dupes == 1 and len(coll_variant) > 0:
-        print("dupes == 1 and len(coll_variant) > 0")
         variant_sets = ["arn", "atq", "fem", "all", "chr", "hml" ]
         if card["set"].lower() in variant_sets:
             var_num = 0
@@ -478,10 +509,8 @@ def build_filename_faces(card,dupes,face,name_check):
         else:
             card_name = card_name + " [" + coll_variant + "]"
     elif dupes > 1 and len(coll_variant) > 0:
-        print("dupes > 1 and len(coll_variant) > 0")
-        card_name = card_name + " [" + c_style + "" + str(coll_variant) + "]"
+        card_name = card_name + " [" + str(dupes) + " " + str(coll_variant) + "]"
     elif len(c_style) > 0 and len(coll_variant) > 0:
-        print("len(c_style) > 0 and len(coll_variant) > 0")
         card_name = card_name + " [" + c_style + "" + coll_variant + "]"
     elif dupes > 0:
         card_name = card_name + " [" + str(dupes) + "]"
@@ -517,7 +546,7 @@ def build_filename_meldresult(card,num):
 # Fighting the urge to call this function some variation of Harvey Dent.
 def two_face(card):
     match card["layout"]:
-        case "transform" | "modal_dfc" | "reversible_card" | "art_series":
+        case "transform" | "modal_dfc" | "reversible_card" | "art_series" | "double_faced_token":
             return True
         case _:
             return False
@@ -541,6 +570,8 @@ def name_check(card,card_list):
 
 def get_lang_path(path,card):
     card_lang = fix_lang(card["lang"])
+    if card["oversized"]:
+        card_lang = card_lang + " NTR"
     if "token" in card["layout"]:
         card_lang = card_lang + " TOK"
     if card["nonfoil"]:
