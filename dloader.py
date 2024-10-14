@@ -278,9 +278,9 @@ def find_dupes(card,card_list):
 # it into its own function.
 def is_dupe(card,loop_card):
     if card["collector_number"] != loop_card["collector_number"]:
-        if card["nonfoil"] == loop_card["nonfoil"]:
-            if "basic" in card["type_line"].lower():
+        if "basic" in card["type_line"].lower():
                 return True
+        if card["nonfoil"] == loop_card["nonfoil"]:
             if card["foil"] == loop_card["foil"]:
                 if card["lang"] == loop_card["lang"]:
                     return True
@@ -440,7 +440,14 @@ def build_filename(card,dupes,name_check):
     c_style = card_style(card)
     coll_variant = collector_num_variant(card)
     # if variant + coll_num variant + dupe
-    if dupes > 1 and len(c_style) > 0 and len(coll_variant) > 0:
+    if dupes > 0 and card["set"] == "plst":
+        if "token" in card["type_line"].lower():
+            card_name = card_name + " [" + str(card["collector_number"][:4]) + "]"
+        else:
+            card_name = card_name + " [" + str(card["collector_number"][:3]) + "]"
+    elif card["set"] == "plst":
+        return card_name
+    elif dupes > 1 and len(c_style) > 0 and len(coll_variant) > 0:
         card_name = card_name + " [" + c_style + " " + coll_variant + " " + str(dupes) + "]"
     elif dupes > 1 and len(c_style) > 0:
         card_name = card_name + " [" + c_style + " " + str(dupes) + "]"

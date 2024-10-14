@@ -5,6 +5,7 @@ from tkinter import font
 from PIL import ImageTk,Image
 import threading
 import sets, controller, settingswindow, controlframe, imageframe, helpwindow
+from sys import platform
 
 # Used for the stop button
 hard_stop = False
@@ -18,7 +19,10 @@ class MainWindow(Tk):
         super().__init__()
         self.controller = controller.Controller()
         self.title('Automatic Eureka')
-        self.iconbitmap('images/ninja_icon.ico')
+        if platform == "win32":
+            self.iconbitmap('images/ae_icon.ico')
+        else:
+            self.iconbitmap('images/ae_icon.png')
         self.menu_bar = MenuBar(self, self.controller)
         self.configure(menu=self.menu_bar)
         self.main_frame = MainFrame(self, self.controller)

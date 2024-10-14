@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
+from sys import platform
 import controller, helpwindow
 
 changes = False
@@ -13,7 +14,10 @@ class SettingsWindow(Toplevel):
         self.title("Settings")
         self.geometry("465x375")
         self.controller = master_controller
-        self.iconbitmap(self.controller.get_home_directory() + "/images/settings.ico")
+        if platform == "win32":
+            self.iconbitmap(self.controller.get_home_directory() + "/images/settings.ico")
+        else:
+            self.iconbitmap(self.controller.get_home_directory() + "/images/settings.png"
         self.frame_path = SettingsFramePath(self, self.controller)
         self.frame_size = SettingsFrameSize(self, self.controller)
         self.frame_filters = SettingsFrameFilters(self, self.controller)
