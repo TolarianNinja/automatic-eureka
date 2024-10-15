@@ -5,9 +5,8 @@ It is an updated (with GUI! and other things!) version of the Bag of Tricks file
 
 Download all source files, run gui.py
 
-Changelog:
-v0.8.2
-Updated icon based on if the application is run on Windows or not
+Changelog: v0.8.2 
+Updated icon based on if the application is run on Windows or not 
 Added requirements.txt via PR
 
 v0.8.1
