@@ -17,7 +17,7 @@ class SettingsWindow(Toplevel):
         if platform == "win32":
             self.iconbitmap(self.controller.get_home_directory() + "/images/settings.ico")
         else:
-            self.iconbitmap(self.controller.get_home_directory() + "/images/settings.png"
+            self.iconbitmap(self.controller.get_home_directory() + "/images/settings.png")
         self.frame_path = SettingsFramePath(self, self.controller)
         self.frame_size = SettingsFrameSize(self, self.controller)
         self.frame_filters = SettingsFrameFilters(self, self.controller)
@@ -198,3 +198,4 @@ class SettingsFrameClose(LabelFrame):
         self.settings_button_cancel = Button(self.settings_frame_close, command=parent.destroy, text="Cancel")
         self.settings_button_okay.grid(row=0, column=0)
         self.settings_button_cancel.grid(row=0, column=1)
+
